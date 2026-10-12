@@ -4,11 +4,16 @@ import contextlib
 import io
 import json
 import os
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from px4_ca_lint.cli import main
-from px4_ca_lint.engine import ENGINE_ENV, EngineError, find_engine
+from px4_ca_lint.engine import ENGINE_ENV, PX4_ENV, EngineError, find_engine, versioned_engine_path
+from tests.test_engine import fake_engine
+
+EXAMPLE = str(Path(__file__).parent.parent / "examples" / "standard_vtol.params")
 
 try:
     ENGINE = str(find_engine())
@@ -35,6 +40,76 @@ class Errors(unittest.TestCase):
         code, _, stderr = run("--engine", "does/not/exist", "examples/standard_vtol.params")
         self.assertEqual(code, 2)
         self.assertIn("not an executable file", stderr)
+
+
+class EngineChoice(unittest.TestCase):
+    """Which engine is used. Stand-in engines that only report a PX4 version are enough for this."""
+
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.directory = Path(directory.name)
+        self.enterContext(mock.patch.dict(os.environ, {"XDG_DATA_HOME": str(self.directory / "data")}))
+        os.environ.pop(ENGINE_ENV, None)
+        os.environ.pop(PX4_ENV, None)
+        previous = os.getcwd()
+        os.chdir(self.directory)
+        self.addCleanup(os.chdir, previous)
+
+    def install(self, px4: str, reports: str) -> None:
+        versioned_engine_path(px4).parent.mkdir(parents=True)
+        fake_engine(
+            versioned_engine_path(px4).parent,
+            f'echo \'{{"engine_schema": 1, "px4_version": "{reports}", "px4_commit": "0123456789abcdef"}}\' > "$2"\n',
+        )
+
+    def test_engines_lists_what_is_installed(self):
+        self.install("v1.17.0", "v1.17.0")
+        self.install("v1.18.0", "v1.18.0")
+        code, stdout, _ = run("engines")
+        self.assertEqual(code, 0)
+        self.assertIn(f"--px4 v1.17.0: {versioned_engine_path('v1.17.0')}", stdout)
+        self.assertIn("PX4 v1.18.0 (0123456789)", stdout)
+        self.assertIn("several PX4 versions", stdout)
+
+        with mock.patch.dict(os.environ, {PX4_ENV: "v1.18.0"}):
+            _, stdout, _ = run("engines")
+
+        self.assertIn(f"Used without --engine and --px4: {versioned_engine_path('v1.18.0')}", stdout)
+
+    def test_engines_without_an_engine(self):
+        code, stdout, _ = run("engines")
+        self.assertEqual(code, 0)
+        self.assertIn("Engines found:\n  none\n", stdout)
+        self.assertIn("not found", stdout)
+
+    def test_a_version_that_is_not_installed(self):
+        self.install("v1.17.0", "v1.17.0")
+        code, _, stderr = run("--px4", "1.18.0", EXAMPLE)
+        self.assertEqual(code, 2)
+        self.assertIn("no engine for PX4 v1.18.0", stderr)
+        self.assertIn("Installed: v1.17.0.", stderr)
+
+    def test_an_engine_of_another_release_is_refused(self):
+        self.install("v1.18.0", "v1.17.0")
+        code, stdout, stderr = run("--px4", "v1.18.0", EXAMPLE)
+        self.assertEqual(code, 2)
+        self.assertEqual(stdout, "")
+        self.assertIn("PX4 v1.18.0 was asked for", stderr)
+        self.assertIn("built against PX4 v1.17.0", stderr)
+
+    def test_the_single_engine_location_is_checked_against_the_release(self):
+        directory = self.directory / "data" / "px4-ca-lint"
+        directory.mkdir(parents=True)
+        fake_engine(directory, 'echo \'{"engine_schema": 1, "px4_version": "v1.17.0"}\' > "$2"\n')
+        code, _, stderr = run("--px4", "v1.18.0", EXAMPLE)
+        self.assertEqual(code, 2)
+        self.assertIn(f"the engine '{directory / 'px4_ca_engine'}' was built against PX4 v1.17.0", stderr)
+
+    def test_a_name_that_is_not_a_version(self):
+        code, _, stderr = run("--px4", "../v1.17.0", EXAMPLE)
+        self.assertEqual(code, 2)
+        self.assertIn("is not a PX4 version", stderr)
 
 
 @unittest.skipIf(ENGINE is None, f"no engine found (set {ENGINE_ENV})")

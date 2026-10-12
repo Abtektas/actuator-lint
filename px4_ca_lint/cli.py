@@ -8,7 +8,16 @@ from pathlib import Path
 
 from . import __version__, diff
 from . import report as single
-from .engine import ENGINE_ENV, EngineError, find_engine, run_engine
+from .engine import (
+    ENGINE_ENV,
+    PX4_ENV,
+    EngineError,
+    check_px4_version,
+    engine_locations,
+    find_engine,
+    requested_px4,
+    run_engine,
+)
 from .params import FORMATS, ParamFileError, parse_file
 from .rules import ERROR, LEVELS, RULES, WARNING, Options, check
 
@@ -19,6 +28,10 @@ EXIT_ERROR = 2
 _DESCRIPTION = (
     "Run PX4's control allocation code on a parameter file and report the resulting matrices "
     "and findings. A review aid, not an airworthiness approval; use at your own risk."
+)
+_ENGINES_DESCRIPTION = (
+    "List the engines this tool finds, the PX4 version each was built against, and the one a "
+    "run without --engine and --px4 uses."
 )
 _DIFF_DESCRIPTION = (
     "Compare two parameter files: changed parameters, changed matrix values, and findings that "
@@ -68,6 +81,12 @@ def _add_common_options(parser: argparse.ArgumentParser, fail_on_help: str) -> N
         metavar="PATH",
         help=f"path to px4_ca_engine (default: ${ENGINE_ENV}, then build/engine, then the user data directory)",
     )
+    parser.add_argument(
+        "--px4",
+        metavar="VERSION",
+        help=f"PX4 version to check against, for example v1.17.0: uses the engine installed for it "
+        f"and refuses an engine built against another release (default: ${PX4_ENV})",
+    )
     parser.add_argument("--fail-on", choices=(*LEVELS, "never"), default=ERROR, help=fail_on_help)
     parser.add_argument(
         "--ignore",
@@ -90,7 +109,8 @@ def _check_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="px4-ca-lint",
         description=_DESCRIPTION,
-        epilog="To compare two parameter files: px4-ca-lint diff BEFORE AFTER",
+        epilog="To compare two parameter files: px4-ca-lint diff BEFORE AFTER. "
+        "To list the installed engines: px4-ca-lint engines",
     )
     parser.add_argument("file", help="parameter file (plain, PX4 airframe script or QGroundControl export)")
     _add_common_options(parser, "lowest finding level that gives exit code 1 (default: error)")
@@ -107,9 +127,47 @@ def _diff_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _engines_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="px4-ca-lint engines", description=_ENGINES_DESCRIPTION)
+    parser.add_argument("--version", action="version", version=f"px4-ca-lint {__version__}")
+    return parser
+
+
+def _engines() -> str:
+    lines = []
+
+    for name, path in engine_locations():
+        if not path.is_file():
+            continue
+
+        try:
+            # any parameter file makes the engine report what it was built against
+            probe = run_engine(path, {"CA_AIRFRAME": "0"})
+            built = f"PX4 {probe.get('px4_version')} ({str(probe.get('px4_commit'))[:10]})"
+
+        except EngineError as error:
+            built = f"not usable: {error}"
+
+        lines.append(f"  {name}: {path}\n      {built}")
+
+    if not lines:
+        lines.append("  none")
+
+    try:
+        default = str(find_engine(px4=requested_px4()))
+
+    except EngineError as error:
+        default = f"none: {error}"
+
+    return "Engines found:\n" + "\n".join(lines) + f"\n\nUsed without --engine and --px4: {default}\n"
+
+
 def _analyse(path: str, args: argparse.Namespace) -> dict:
     param_file = parse_file(path, None if args.input_format == "auto" else args.input_format)
-    engine_result = run_engine(find_engine(args.engine), param_file.params)
+    px4 = requested_px4(args.px4)
+    engine = find_engine(args.engine, px4)
+    engine_result = run_engine(engine, param_file.params)
+    check_px4_version(px4, engine, engine_result)
     options = Options(max_thrust_gain=args.max_thrust_gain, ignore=args.ignore)
     checked = check(engine_result, options, param_file.params)
     return single.build_report(param_file, engine_result, checked)
@@ -133,6 +191,11 @@ def main(argv: list[str] | None = None) -> int:
     comparing = bool(argv) and argv[0] == "diff"
 
     try:
+        if argv and argv[0] == "engines":
+            _engines_parser().parse_args(argv[1:])
+            sys.stdout.write(_engines())
+            return EXIT_OK
+
         if comparing:
             args = _diff_parser().parse_args(argv[1:])
             result = diff.build_diff(_analyse(args.before, args), _analyse(args.after, args))

@@ -121,6 +121,34 @@ yourself, see [Building the engine](#building-the-engine).
 The engine is looked up in this order: `--engine PATH`, `$PX4_CA_ENGINE`,
 `build/engine/px4_ca_engine` in the current directory,
 `~/.local/share/px4-ca-lint/px4_ca_engine` (`$XDG_DATA_HOME` is honoured).
+Since tool version 0.4.0 the engines described in the next section come last.
+
+### Engines for several PX4 versions
+
+Since tool version 0.4.0, engines for different PX4 versions can be installed
+side by side, each in a directory named after its PX4 version:
+
+```
+~/.local/share/px4-ca-lint/engines/v1.17.0/px4_ca_engine
+~/.local/share/px4-ca-lint/engines/v1.18.0/px4_ca_engine
+```
+
+`--px4 v1.17.0` (or `$PX4_CA_PX4`) chooses one of them. When only one is
+installed it is used without the option. When several are installed and none is
+chosen, the tool stops with an error and does not pick one for you.
+
+When `--px4` names a PX4 release, the result comes from an engine built against
+exactly that release or there is no result: an engine built against anything
+else is refused, wherever it was found, also one given with `--engine` or
+`$PX4_CA_ENGINE`. This is a way to make sure a result belongs to the PX4
+version you fly.
+
+`px4-ca-lint engines` lists the engines the tool finds, the PX4 version each
+was built against and the one a run without `--engine` and `--px4` uses.
+
+The prebuilt engines are still for PX4 v1.17.0 only. An engine for another
+version is one you [build yourself](#building-the-engine) and copy into such a
+directory.
 
 ## Usage
 

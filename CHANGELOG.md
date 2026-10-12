@@ -5,6 +5,25 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
 
 ## Unreleased
 
+### Added
+
+- Engines for several PX4 versions can be installed side by side, in
+  `~/.local/share/px4-ca-lint/engines/<PX4 version>/px4_ca_engine`. The new
+  option `--px4 VERSION` (or `$PX4_CA_PX4`) chooses one. When only one is
+  installed it is used without the option; when several are installed and none
+  is chosen, the tool stops with an error.
+- When `--px4` names a PX4 release, an engine built against anything else is
+  refused, wherever it was found, also one given with `--engine` or
+  `$PX4_CA_ENGINE`.
+- `px4-ca-lint engines` lists the engines the tool finds, the PX4 version each
+  was built against and the one a run without `--engine` and `--px4` uses.
+
+### Changed
+
+- The single engine location of earlier versions,
+  `~/.local/share/px4-ca-lint/px4_ca_engine`, keeps working and is tried before
+  the new directories. The message for a missing engine names the new location.
+
 ## 0.3.0 - 2026-10-09
 
 Prebuilt engines contain the control allocation code of PX4 v1.17.0
