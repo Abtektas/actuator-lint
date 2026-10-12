@@ -8,6 +8,18 @@ from px4_ca_lint.report import build_report as _build_report
 from px4_ca_lint.rules import check
 
 ZERO = [0, 0]
+PHASES = ("hover", "transition_to_forward", "forward", "transition_to_hover")
+
+
+def flight_phases(stopped_in_forward=(), recomputed=False):
+    return [
+        {
+            "phase": phase,
+            "stopped_motors": list(stopped_in_forward) if phase == "forward" else [],
+            "matrices_recomputed": recomputed and phase == "hover",
+        }
+        for phase in PHASES
+    ]
 
 
 def engine_result(**matrix_overrides):
@@ -40,6 +52,7 @@ def engine_result(**matrix_overrides):
         "num_motors": 1,
         "num_servos": 1,
         "matrices": [matrix],
+        "flight_phases": flight_phases(),
     }
 
 
@@ -87,6 +100,60 @@ class Report(unittest.TestCase):
         notes = build_report(param_file(), result)["notes"]
         self.assertEqual(len(notes), 1)
         self.assertIn("CA_SV_TLn_MINA", notes[0])
+
+    def two_motors(self, **phases):
+        result = engine_result(actuators=[{"type": "motor", "index": 0}, {"type": "motor", "index": 1}])
+        result["ca_airframe"] = 2
+        result["flight_phases"] = flight_phases(**phases)
+        return build_report(param_file(), result)
+
+    def test_stopped_motors_and_the_mix_of_the_others(self):
+        report = self.two_motors(stopped_in_forward=[0])
+        self.assertEqual(report["flight_phases"][2]["stopped_motors"], ["motor0"])
+        self.assertEqual(report["flight_phases"][0]["stopped_motors"], [])
+        text = render_text(report)
+        self.assertIn("Flight phases: motors PX4 stops in a flight phase, whatever the setpoint", text)
+        self.assertIn("  hover                         none\n", text)
+        self.assertIn("  forward flight                motor0\n", text)
+        self.assertIn("for example a pusher in hover", text)
+        section = text.split("Mix of the other motors in forward flight:")[1].split("Findings")[0]
+        self.assertIn("motor1", section)
+        self.assertNotIn("motor0", section)
+        markdown = render_markdown(report)
+        self.assertIn("#### Flight phases", markdown)
+        self.assertIn("| forward flight | motor0 |", markdown)
+        self.assertIn("| motor1 | 0.000 |", markdown)
+        self.assertNotIn("| motor0 | 1.000 | 0.000 | 0.000 | 0.000 | 0.000 | -1.000 |\n\n<details>", markdown)
+
+    def test_no_flight_phase_section_when_no_motor_is_stopped(self):
+        report = self.two_motors()
+        self.assertNotIn("Flight phases", render_text(report))
+        self.assertNotIn("Flight phases", render_markdown(report))
+        self.assertEqual(len(report["flight_phases"]), 4)
+
+    def test_no_mix_per_phase_when_px4_recomputes_the_matrices(self):
+        text = render_text(self.two_motors(stopped_in_forward=[1], recomputed=True))
+        self.assertIn("  forward flight                motor1\n", text)
+        self.assertIn("PX4 recomputes the matrices of this airframe in flight", text)
+        self.assertNotIn("Mix of the other motors", text)
+
+    def test_all_motors_stopped(self):
+        text = render_text(self.two_motors(stopped_in_forward=[0, 1]))
+        self.assertIn("Mix of the other motors in forward flight:\n  none\n", text)
+
+    def test_an_engine_without_flight_phases(self):
+        result = engine_result()
+        del result["flight_phases"]
+        report = build_report(param_file(), result)
+        self.assertIsNone(report["flight_phases"])
+        # a multirotor has no flight phases to report
+        self.assertEqual(report["notes"], [])
+        self.assertNotIn("Flight phases", render_text(report))
+
+        for airframe in (2, 3, 4):
+            result["ca_airframe"] = airframe
+            notes = build_report(param_file(), result)["notes"]
+            self.assertIn("does not report which motors PX4 stops", notes[0], airframe)
 
     def test_findings_are_in_both_formats(self):
         report = build_report(param_file(), engine_result(weak_axes_zeroed=["yaw"]))

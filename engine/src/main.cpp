@@ -322,6 +322,48 @@ int main(int argc, char **argv)
 		fprintf(out, "      ]\n    }%s\n", i + 1 < effectiveness->numMatrices() ? "," : "");
 	}
 
+	fputs("  ],\n", out);
+
+	// The motors PX4 stops in each flight phase. ControlAllocator::Run() passes the phase of
+	// vehicle_status to the effectiveness source, and publish_actuator_controls() sends no command
+	// to the motors of getStoppedMotors(). The phases are set in the order of a flight.
+	static const struct {
+		ActuatorEffectiveness::FlightPhase phase;
+		const char *name;
+	} PHASES[] = {
+		{ActuatorEffectiveness::FlightPhase::HOVER_FLIGHT, "hover"},
+		{ActuatorEffectiveness::FlightPhase::TRANSITION_HF_TO_FF, "transition_to_forward"},
+		{ActuatorEffectiveness::FlightPhase::FORWARD_FLIGHT, "forward"},
+		{ActuatorEffectiveness::FlightPhase::TRANSITION_FF_TO_HF, "transition_to_hover"},
+	};
+	const int num_phases = sizeof(PHASES) / sizeof(PHASES[0]);
+
+	fputs("  \"flight_phases\": [\n", out);
+
+	for (int p = 0; p < num_phases; p++) {
+		effectiveness->setFlightPhase(PHASES[p].phase);
+		const uint32_t stopped = effectiveness->getStoppedMotors();
+
+		// ControlAllocator::update_effectiveness_matrix_if_needed() asks this in every cycle.
+		// True means that PX4 computes new matrices for this phase, which are not the ones above.
+		ActuatorEffectiveness::Configuration phase_config{};
+		const bool recomputed = effectiveness->getEffectivenessMatrix(phase_config,
+					EffectivenessUpdateReason::NO_EXTERNAL_UPDATE);
+
+		fprintf(out, "    {\"phase\": \"%s\", \"stopped_motors\": [", PHASES[p].name);
+		bool first = true;
+
+		for (int m = 0; m < config.num_actuators[(int)ActuatorType::MOTORS]; m++) {
+			if (stopped & (1u << m)) {
+				fprintf(out, "%s%d", first ? "" : ", ", m);
+				first = false;
+			}
+		}
+
+		fprintf(out, "], \"matrices_recomputed\": %s}%s\n", recomputed ? "true" : "false",
+			p + 1 < num_phases ? "," : "");
+	}
+
 	fputs("  ]\n}\n", out);
 	fclose(out);
 	delete effectiveness;

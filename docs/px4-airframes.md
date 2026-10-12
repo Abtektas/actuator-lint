@@ -45,5 +45,19 @@ JSBSim hexarotor was started in PX4 v1.17.0 SITL, where
 a Crazyflie, in the JSBSim simulation or in HIL, so whether these airframes
 work in practice has not been checked.
 
+### Motors stopped by flight phase
+
+Ten scripts have motors that PX4 stops in forward flight whatever the setpoint:
+
+| Scripts | Stopped in forward flight |
+|---|---|
+| 6 standard VTOLs | motor0 to motor3, the lift motors; motor4, the forward thrust motor, is left |
+| `init.d/airframes/1002_standard_vtol.hil` | motor0 to motor3, which are all motors PX4 knows of, see the finding above |
+| 3 of the 4 tiltrotor VTOLs | motor1 and motor3, the motors that do not tilt |
+
+In `init.d/airframes/13030_generic_vtol_quad_tiltrotor` all four motors tilt,
+so none is stopped. No motor is stopped in hover or in a transition, and none
+in any phase for the other airframe types.
+
 The limit of rule CA010 was chosen with these scripts: the omnicopter airframes
 have thrust gains of 1.66, below the default limit of 2.0.

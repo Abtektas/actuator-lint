@@ -64,7 +64,7 @@ def summarise(script: Path, engine: Path) -> dict:
         return {"status": "unsupported", "ca_airframe": int(float(param_file.params["CA_AIRFRAME"]))}
 
     report = build_report(param_file, engine_result, check(engine_result, params=param_file.params))
-    return _round(
+    summary = _round(
         {
             "status": "checked",
             "airframe": report["airframe"],
@@ -75,6 +75,17 @@ def summarise(script: Path, engine: Path) -> dict:
             "matrices": report["matrices"],
         }
     )
+    # the motors PX4 stops by flight phase; left out for the many airframes without any
+    stopped = {
+        phase["phase"]: phase["stopped_motors"]
+        for phase in report["flight_phases"] or []
+        if phase["stopped_motors"]
+    }
+
+    if stopped:
+        summary["stopped_motors"] = stopped
+
+    return summary
 
 
 def differences(expected, actual, where="") -> list[str]:

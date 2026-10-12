@@ -209,6 +209,38 @@ class WithEngine(unittest.TestCase):
         self.assertEqual([round(row["yaw"], 3) for row in report["matrices"][0]["mix"]], [0, 0, 0, 0, 1, -1])
         self.assertIn("tiltrotor: matrix 0", report["notes"][-1])
 
+    def stopped_motors(self, path):
+        phases = self.report(path)["flight_phases"]
+
+        if phases is None:
+            self.skipTest("the engine was built before flight phases were reported")
+
+        return {phase["phase"]: phase["stopped_motors"] for phase in phases if phase["stopped_motors"]}
+
+    def test_motors_stopped_by_the_flight_phase(self):
+        lift_motors = ["motor0", "motor1", "motor2", "motor3"]
+        self.assertEqual(self.stopped_motors("examples/standard_vtol.params"), {"forward": lift_motors})
+        # the motors that do not tilt
+        self.assertEqual(self.stopped_motors("examples/tiltrotor.params"), {"forward": ["motor1", "motor3"]})
+        # a tailsitter flies forward on the motors it hovers on
+        self.assertEqual(self.stopped_motors("examples/tailsitter.params"), {})
+        self.assertEqual(self.stopped_motors("examples/quad_qgc_export.params"), {})
+        self.assertEqual(self.stopped_motors("examples/fixed_wing.params"), {})
+
+    def test_flight_phases_in_the_text_report(self):
+        code, stdout, _ = run("--engine", ENGINE, "examples/standard_vtol_pusher_offset.params")
+        self.assertEqual(code, 0)
+
+        if "does not report which motors PX4 stops" in stdout:
+            self.skipTest("the engine was built before flight phases were reported")
+
+        self.assertIn("  forward flight                motor0, motor1, motor2, motor3\n", stdout)
+        mix = stdout.split("Mix of the other motors in forward flight:")[1].split("Findings")[0].split()
+        # only the pusher is left, with the thrust gain of PX4 issue #28829
+        self.assertEqual(mix[7], "motor4")
+        self.assertAlmostEqual(float(mix[11]), 4.0)
+        self.assertEqual(len(mix), 14)
+
     def test_tiltrotor_tilt_servo_missing(self):
         report = self.report("examples/tiltrotor_tilt_servo_missing.params")
         self.assertEqual([finding["rule"] for finding in report["findings"]], ["CA022"])

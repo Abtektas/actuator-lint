@@ -191,6 +191,15 @@ shows the one PX4 computes after a parameter change, with the tilt servos at
 their minimum angle (`CA_SV_TLn_MINA`), the hover position. The matrices PX4
 uses during the transition and in forward flight are not covered.
 
+For a VTOL the report also lists the motors PX4 stops in a flight phase
+whatever the setpoint, for example the lift motors of a standard VTOL in
+forward flight, and the mix of the motors that are left. PX4 does not recompute
+its matrices for a flight phase, so the stopped motors remain part of them; in
+PX4 v1.17.0, for example, they still count in the thrust scale. Motors that PX4
+stops only while there is no thrust demand for them, such as a pusher in hover,
+depend on the setpoints and are not listed. This needs an engine built from
+tool version 0.4.0 or newer.
+
 The report shows what goes through the matrices. Control surface trim, flaps
 and spoilers (`CA_SV_CSn_TRIM`, `_FLAP`, `_SPOIL`) are applied by PX4 outside
 the matrices and are not part of it.
@@ -250,6 +259,12 @@ cross-check compares the effectiveness matrices only; the mix matrix comes from
 the same PX4 class in both cases. PX4 has no SIH airframe with tilt servos, so
 for the tiltrotor and the multirotor with tilt the parameters of an example are
 set on a running SIH quadrotor.
+
+The motors stopped by flight phase are not part of the cross-check, because it
+does not fly. They were compared by hand with two logged SIH flights of a
+standard VTOL on PX4 `release/1.18` (29637c56d9 with the change of PX4 pull
+request 29025): in forward flight the four lift motors had no command in every
+sample, as the report says, and in hover and in the transitions they had one.
 
 After every release, the `install check` workflow follows the install steps
 above, with uv and with a virtual environment, on clean Linux x86_64, Linux

@@ -238,5 +238,13 @@
     }
    ]
   }
- ]
+ ],
+ "stopped_motors": {
+  "forward": [
+   "motor0",
+   "motor1",
+   "motor2",
+   "motor3"
+  ]
+ }
 }

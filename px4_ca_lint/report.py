@@ -10,6 +10,16 @@ from .rules import AXES, ERROR, RULES, WARNING, Result, rule_url
 
 _MAX_LISTED_UNKNOWN = 10
 
+# CA_AIRFRAME values of the VTOL types, for which PX4 stops motors by flight phase
+_VTOL_AIRFRAMES = (2, 3, 4)
+# flight phases in the engine output
+_PHASE_NAMES = {
+    "hover": "hover",
+    "transition_to_forward": "transition to forward flight",
+    "forward": "forward flight",
+    "transition_to_hover": "transition to hover",
+}
+
 
 def _label(actuator: dict) -> str:
     return f"{actuator['type']}{actuator['index']}"
@@ -57,15 +67,43 @@ def _unknown_parameter_notes(engine_result: dict) -> list[str]:
 
 
 def _airframe_notes(engine_result: dict) -> list[str]:
+    if not engine_result.get("matrices"):
+        return []
+
+    notes = []
+
+    if engine_result.get("ca_airframe") in _VTOL_AIRFRAMES and "flight_phases" not in engine_result:
+        notes.append(
+            "this engine does not report which motors PX4 stops in a flight phase; an engine built "
+            "from px4-ca-lint 0.4.0 or newer does"
+        )
+
     # CA_AIRFRAME 3, tiltrotor VTOL: ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix()
-    if engine_result.get("ca_airframe") == 3 and engine_result.get("matrices"):
-        return [
+    if engine_result.get("ca_airframe") == 3:
+        notes.append(
             "tiltrotor: matrix 0 is the one PX4 computes after a parameter change, with the tilt "
             "servos at their minimum angle (CA_SV_TLn_MINA), which is the hover position; in flight PX4 "
             "recomputes it with the tilt angle, which this report does not cover"
-        ]
+        )
 
-    return []
+    return notes
+
+
+def _flight_phases(engine_result: dict) -> list[dict] | None:
+    """The motors PX4 stops in each flight phase, or None when the engine does not report them."""
+    phases = engine_result.get("flight_phases")
+
+    if phases is None:
+        return None
+
+    return [
+        {
+            "phase": phase["phase"],
+            "stopped_motors": [f"motor{index}" for index in phase["stopped_motors"]],
+            "matrices_recomputed": phase["matrices_recomputed"],
+        }
+        for phase in phases
+    ]
 
 
 def build_report(param_file: ParamFile, engine_result: dict, checked: Result) -> dict:
@@ -107,6 +145,7 @@ def build_report(param_file: ParamFile, engine_result: dict, checked: Result) ->
         "findings": [{**finding.as_dict(), "url": rule_url(finding.rule)} for finding in checked.findings],
         "rules_not_checked": checked.not_checked,
         "matrices": matrices,
+        "flight_phases": _flight_phases(engine_result),
         "disclaimer": DISCLAIMER,
     }
 
@@ -134,6 +173,43 @@ def _table(corner: str, columns: list[str], rows: list[tuple[str, list[float | N
         )
 
     return lines
+
+
+def _phases_with_stopped_motors(report: dict) -> list[dict]:
+    """The flight phases to report: all of them, if PX4 stops a motor in at least one."""
+    phases = report["flight_phases"] or []
+    return phases if any(phase["stopped_motors"] for phase in phases) else []
+
+
+def _phase_name(phase: dict) -> str:
+    return _PHASE_NAMES.get(phase["phase"], phase["phase"])
+
+
+def _other_motors(report: dict, phase: dict) -> list[tuple[str, list[float | None]]]:
+    """The mix rows of the motors PX4 does not stop because of a flight phase."""
+    return [
+        (name, [row[axis] for axis in AXES])
+        for matrix in report["matrices"]
+        for name, row in zip(matrix["actuators"], matrix["mix"])
+        if name.startswith("motor") and name not in phase["stopped_motors"]
+    ]
+
+
+_PHASE_TITLE = "motors PX4 stops in a flight phase, whatever the setpoint"
+# ActuatorEffectiveness::stopMaskedMotorsWithZeroThrust() in PX4 v1.17.0,
+# ActuatorEffectiveness::stopMotorsBasedOnThrustSetpoint() in later versions
+_PHASE_NOT_LISTED = (
+    "PX4 can also stop a motor while there is no thrust demand for it, for example a pusher in "
+    "hover. That depends on the setpoints and is not listed."
+)
+_PHASE_SAME_MATRICES = (
+    "PX4 does not recompute the matrices when the flight phase changes, and it sends no command "
+    "to a stopped motor."
+)
+_PHASE_OTHER_MATRICES = (
+    "PX4 recomputes the matrices of this airframe in flight, so the mix of the other motors is "
+    "not shown."
+)
 
 
 def render_text(report: dict) -> str:
@@ -182,6 +258,29 @@ def render_text(report: dict) -> str:
                 f"  {axis['axis'].ljust(name_width)}  {axis['status']}"
                 + (f" (authority {_number(axis['authority'])})" if axis["authority"] > 0 else "")
             )
+
+    phases = _phases_with_stopped_motors(report)
+
+    if phases:
+        lines += ["", f"Flight phases: {_PHASE_TITLE}"]
+        name_width = max(len(_phase_name(phase)) for phase in phases)
+        lines += [
+            f"  {_phase_name(phase).ljust(name_width)}  {', '.join(phase['stopped_motors']) or 'none'}"
+            for phase in phases
+        ]
+        lines += ["", f"  {_PHASE_NOT_LISTED}"]
+
+        if any(phase["matrices_recomputed"] for phase in phases):
+            lines.append(f"  {_PHASE_OTHER_MATRICES}")
+
+        else:
+            lines.append(f"  {_PHASE_SAME_MATRICES}")
+
+            for phase in phases:
+                if phase["stopped_motors"]:
+                    lines += ["", f"  Mix of the other motors in {_phase_name(phase)}:"]
+                    others = _other_motors(report, phase)
+                    lines += _table("actuator", list(AXES), others) if others else ["  none"]
 
     lines += ["", "Findings"]
 
@@ -250,6 +349,35 @@ def render_markdown(report: dict) -> str:
     if report["notes"]:
         lines += ["", "#### Notes", ""]
         lines += [f"- {note}" for note in report["notes"]]
+
+    phases = _phases_with_stopped_motors(report)
+
+    if phases:
+        lines += [
+            "",
+            "#### Flight phases",
+            "",
+            f"The {_PHASE_TITLE}:",
+            "",
+            "| Flight phase | Stopped motors |",
+            "|---|---|",
+        ]
+        lines += [
+            f"| {_phase_name(phase)} | {', '.join(phase['stopped_motors']) or 'none'} |" for phase in phases
+        ]
+        lines += ["", _PHASE_NOT_LISTED]
+
+        if any(phase["matrices_recomputed"] for phase in phases):
+            lines += ["", _PHASE_OTHER_MATRICES]
+
+        else:
+            lines += ["", _PHASE_SAME_MATRICES]
+
+            for phase in phases:
+                if phase["stopped_motors"]:
+                    lines += ["", f"Mix of the other motors in {_phase_name(phase)}:", ""]
+                    others = _other_motors(report, phase)
+                    lines += _markdown_table("actuator", list(AXES), others) if others else ["None."]
 
     for matrix in report["matrices"]:
         actuators = matrix["actuators"]

@@ -17,6 +17,15 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   `$PX4_CA_ENGINE`.
 - `px4-ca-lint engines` lists the engines the tool finds, the PX4 version each
   was built against and the one a run without `--engine` and `--px4` uses.
+- For VTOLs the report lists the motors PX4 stops in a flight phase whatever
+  the setpoint, and the mix of the motors that are left: for a standard VTOL
+  the lift motors in forward flight, for a tiltrotor the motors that do not
+  tilt. Motors that PX4 stops only while there is no thrust demand for them,
+  such as a pusher in hover, are not listed. The JSON report has the new entry
+  `flight_phases`. An engine built from this version is needed; with an older
+  engine the report says that the flight phases are missing.
+- The golden reports of the seven standard VTOL and three tiltrotor scripts of
+  PX4 v1.17.0 that have such motors now store them.
 
 ### Changed
 
