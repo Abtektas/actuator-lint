@@ -3,7 +3,12 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions are explained in [docs/versioning.md](docs/versioning.md).
 
-## Unreleased
+## 0.4.0 - 2026-10-13
+
+Prebuilt engines contain the control allocation code of PX4 v1.17.0
+(`engine_schema` 1), as in 0.3.0. They are new builds: the flight phases and
+the check of integer parameters need the engine of this release, so replace
+the engine when you update the tool.
 
 ### Added
 
@@ -32,8 +37,9 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   configurations gave no finding before. New example
   `examples/quad_no_positions.params`. Of PX4's own airframe scripts only
   `1002_standard_vtol.hil` is affected, whose forward rotor is not counted.
-- Rule CA006: an axis cannot be controlled independently of the others, for
-  example yaw of a quadrotor whose rotors all turn the same way. It is the test
+- Rule CA006 (error, or warning for an axis the vehicle type does not need):
+  an axis cannot be controlled independently of the others, for example yaw
+  of a quadrotor whose rotors all turn the same way. It is the test
   PX4 `main` applies when it drops an axis (CA002), applied by the tool for PX4
   versions that do not have it, which are v1.17.0 and release/1.18. Such
   configurations gave no finding there. The result was compared with PX4
