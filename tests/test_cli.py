@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """End-to-end tests. They need a built engine and are skipped without one."""
 
 import contextlib

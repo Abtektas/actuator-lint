@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """The picture stored in docs/images/terminal.svg is made from what the tool prints now.
 
 Needs an engine built against the PX4 version of the picture; skipped with another engine.

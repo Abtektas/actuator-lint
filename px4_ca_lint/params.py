@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """Read PX4 parameters from the supported file formats.
 
 Three formats are recognised:

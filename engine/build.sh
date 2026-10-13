@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: BSD-3-Clause
 # Build px4_ca_engine against a PX4 source tree without modifying that tree.
 #
 # usage: engine/build.sh <path to PX4-Autopilot> [build directory]

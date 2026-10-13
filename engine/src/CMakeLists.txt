@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 # px4-ca-lint engine.
 #
 # Built as a PX4 "external modules" directory, so no file tracked by PX4 is

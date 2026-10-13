@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """Cross-check against a running PX4 SITL instance.
 
 PX4 SITL is started without a simulator window, with one of PX4's SIH airframes.

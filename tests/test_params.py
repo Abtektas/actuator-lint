@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 import tempfile
 import unittest
 from pathlib import Path

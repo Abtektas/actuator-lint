@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """Offline review aid for PX4 control allocation parameters."""
 
 __version__ = "0.4.0"

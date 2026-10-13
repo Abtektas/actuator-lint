@@ -148,10 +148,17 @@ static const char *methodName(AllocationMethod method)
 	}
 }
 
+// Printed with the usage, so that the program carries its terms when it is copied without its package
+static const char NOTICE[] =
+	"px4_ca_engine is part of px4-ca-lint (BSD-3-Clause) and contains code of the PX4 Autopilot project,\n"
+	"copyright (c) 2012 - 2023, PX4 Development Team, licensed under the BSD 3-Clause license.\n"
+	"Provided \"as is\", without warranty of any kind. The authors and contributors accept no liability\n"
+	"and no responsibility for any use of it or of its results. A review aid, not an airworthiness approval.";
+
 int main(int argc, char **argv)
 {
 	if (argc != 3) {
-		fprintf(stderr, "usage: px4_ca_engine <params file> <output json>\n");
+		fprintf(stderr, "usage: px4_ca_engine <params file> <output json>\n\n%s\n", NOTICE);
 		return EXIT_USAGE;
 	}
 

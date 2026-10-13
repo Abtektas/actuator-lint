@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: BSD-3-Clause
 # Build PX4 SITL (px4_sitl_default) for the cross-check in tests/test_sitl.py.
 # The build directory is outside the PX4 tree.
 #

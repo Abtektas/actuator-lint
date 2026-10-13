@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: BSD-3-Clause
 # Put a built engine into an archive with a checksum, and print what it needs
 # from the system it runs on.
 #
@@ -56,7 +57,9 @@ cp "${PX4_DIR}/LICENSE" "${WORK}/${NAME}/LICENSE-PX4"
 	echo "licensed under the BSD 3-Clause license. Its license text is in LICENSE-PX4."
 	echo "The px4-ca-lint code is licensed as stated in LICENSE."
 	echo
-	echo "Provided \"as is\", without warranty of any kind. See LICENSE."
+	echo "Provided \"as is\", without warranty of any kind. The authors and contributors"
+	echo "accept no liability and no responsibility for any use of it or of its results."
+	echo "A review aid, not an airworthiness approval. See LICENSE."
 } > "${WORK}/${NAME}/README.txt"
 
 tar -C "${WORK}" -czf "${OUT}/${NAME}.tar.gz" "${NAME}"

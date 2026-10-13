@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """Build the report from the parsed parameters and the engine output."""
 
 from __future__ import annotations

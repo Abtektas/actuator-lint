@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """Command line interface."""
 
 from __future__ import annotations
@@ -6,7 +7,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import __version__, diff
+from . import diff, legal
 from . import report as single
 from .engine import (
     ENGINE_ENV,
@@ -38,6 +39,14 @@ _DIFF_DESCRIPTION = (
     "Compare two parameter files: changed parameters, changed matrix values, and findings that "
     "are new or gone in the second file. A review aid, not an airworthiness approval."
 )
+
+
+class _Version(argparse.Action):
+    """Like argparse's version action, but the lines stay as they are."""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        print(legal.version_text())
+        parser.exit()
 
 
 def _rule_list(text: str) -> frozenset[str]:
@@ -103,7 +112,9 @@ def _add_common_options(parser: argparse.ArgumentParser, fail_on_help: str) -> N
         default=Options.max_thrust_gain,
         help=f"limit for rule CA010 (default: {Options.max_thrust_gain})",
     )
-    parser.add_argument("--version", action="version", version=f"px4-ca-lint {__version__}")
+    parser.add_argument(
+        "--version", action=_Version, nargs=0, help="show the version and the terms in short, and exit"
+    )
 
 
 def _check_parser() -> argparse.ArgumentParser:
@@ -111,7 +122,8 @@ def _check_parser() -> argparse.ArgumentParser:
         prog="px4-ca-lint",
         description=_DESCRIPTION,
         epilog="To compare two parameter files: px4-ca-lint diff BEFORE AFTER. "
-        "To list the installed engines: px4-ca-lint engines",
+        "To list the installed engines: px4-ca-lint engines. "
+        "To print the license and the notices: px4-ca-lint license",
     )
     parser.add_argument("file", help="parameter file (plain, PX4 airframe script or QGroundControl export)")
     _add_common_options(parser, "lowest finding level that gives exit code 1 (default: error)")
@@ -130,7 +142,9 @@ def _diff_parser() -> argparse.ArgumentParser:
 
 def _engines_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="px4-ca-lint engines", description=_ENGINES_DESCRIPTION)
-    parser.add_argument("--version", action="version", version=f"px4-ca-lint {__version__}")
+    parser.add_argument(
+        "--version", action=_Version, nargs=0, help="show the version and the terms in short, and exit"
+    )
     return parser
 
 
@@ -192,6 +206,10 @@ def main(argv: list[str] | None = None) -> int:
     comparing = bool(argv) and argv[0] == "diff"
 
     try:
+        if argv == ["license"]:
+            sys.stdout.write(legal.license_text())
+            return EXIT_OK
+
         if argv and argv[0] == "engines":
             _engines_parser().parse_args(argv[1:])
             sys.stdout.write(_engines())

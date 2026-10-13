@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: BSD-3-Clause
 """Write docs/images/terminal.svg: the tool in a terminal, for the README.
 
 usage: tools/terminal_image.py [--check]

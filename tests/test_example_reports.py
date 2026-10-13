@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """The reports stored in docs/example-reports/ are what the tool prints for the files in examples/.
 
 Needs an engine built against the PX4 version of those reports; skipped with another engine.

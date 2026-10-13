@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """Find and run the px4_ca_engine executable."""
 
 from __future__ import annotations

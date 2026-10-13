@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """Rules that turn the engine output into findings.
 
 Every rule has a document in rules/ that explains what it checks and why.

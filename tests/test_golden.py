@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """Golden tests over the airframe scripts shipped with PX4.
 
 The reports for every airframe script of a PX4 release are stored in

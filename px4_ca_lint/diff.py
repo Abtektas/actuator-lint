@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: BSD-3-Clause
 """Compare the reports of two parameter files."""
 
 from __future__ import annotations

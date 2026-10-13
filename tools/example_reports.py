@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: BSD-3-Clause
 """Write the report of every file in examples/ to docs/example-reports/.
 
 usage: tools/example_reports.py [--check]
