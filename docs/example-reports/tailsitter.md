@@ -1,0 +1,56 @@
+### px4-ca-lint report: 0 error(s), 0 warning(s)
+
+- Input: `examples/tailsitter.params` (plain format, 13 parameters)
+- PX4: `v1.17.0` (`d6f12ad1c4`)
+- Airframe: `CA_AIRFRAME` 4 (VTOL Tailsitter), 2 motors, 2 servos
+- Tool: px4-ca-lint 0.4.0
+
+#### Findings
+
+- CA002 was not checked: this PX4 version does not report dropped axes
+
+<details><summary>Matrix 0 (sequential_desaturation, roll/pitch/yaw normalised)</summary>
+
+Effectiveness: what each actuator produces on each axis
+
+| axis | motor0 | motor1 |
+|---|---:|---:|
+| roll | 1.300 | -1.300 |
+| pitch | 0.000 | 0.000 |
+| yaw | 0.000 | 0.000 |
+| thrust_x | 0.000 | 0.000 |
+| thrust_y | 0.000 | 0.000 |
+| thrust_z | -6.500 | -6.500 |
+
+Mix: actuator command per unit of setpoint on each axis
+
+| actuator | roll | pitch | yaw | thrust_x | thrust_y | thrust_z |
+|---|---:|---:|---:|---:|---:|---:|
+| motor0 | 0.385 | 0.000 | 0.000 | 0.000 | 0.000 | -1.000 |
+| motor1 | -0.385 | 0.000 | 0.000 | 0.000 | 0.000 | -1.000 |
+
+</details>
+
+<details><summary>Matrix 1 (pseudo_inverse)</summary>
+
+Effectiveness: what each actuator produces on each axis
+
+| axis | servo0 | servo1 |
+|---|---:|---:|
+| roll | 0.000 | 0.000 |
+| pitch | 0.500 | 0.500 |
+| yaw | 0.500 | -0.500 |
+| thrust_x | 0.000 | 0.000 |
+| thrust_y | 0.000 | 0.000 |
+| thrust_z | 0.000 | 0.000 |
+
+Mix: actuator command per unit of setpoint on each axis
+
+| actuator | roll | pitch | yaw | thrust_x | thrust_y | thrust_z |
+|---|---:|---:|---:|---:|---:|---:|
+| servo0 | 0.000 | 1.000 | 1.000 | 0.000 | 0.000 | 0.000 |
+| servo1 | 0.000 | 1.000 | -1.000 | 0.000 | 0.000 | 0.000 |
+
+</details>
+
+_This report is a review aid, not an airworthiness approval. No findings does not mean the configuration is safe. There is no warranty, and the authors accept no liability and no responsibility: whether and how you use it is your own decision, at your own risk._

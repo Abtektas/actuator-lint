@@ -16,6 +16,11 @@ PX4, see [docs/versioning.md](docs/versioning.md). The version is below 1.0:
 rules and the output format can still change from one minor version to the
 next, and the [changelog](CHANGELOG.md) says when they do.
 
+New here? [Getting started](docs/getting-started.md) goes from a vehicle to a
+report in a few minutes, [Reading a report](docs/reading-a-report.md) explains
+what the tool prints, and the [example reports](docs/example-reports/README.md)
+show it for known mistakes without installing anything.
+
 ## Safety and liability
 
 - This software is provided "as is", without warranty of any kind. See

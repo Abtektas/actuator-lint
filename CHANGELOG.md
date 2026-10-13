@@ -3,6 +3,17 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions are explained in [docs/versioning.md](docs/versioning.md).
 
+## Unreleased
+
+### Added
+
+- Documentation for new users: [Getting started](docs/getting-started.md),
+  [Reading a report](docs/reading-a-report.md) with a figure of the body axes
+  and motor numbers, and the report of every file in `examples/` in
+  [docs/example-reports](docs/example-reports/README.md). The example reports
+  are written by `tools/example_reports.py`, and a test fails when one of them
+  is out of date.
+
 ## 0.4.0 - 2026-10-13
 
 Prebuilt engines contain the control allocation code of PX4 v1.17.0
