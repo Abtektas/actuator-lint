@@ -106,7 +106,8 @@ static int loadParams(const char *path, FILE *out)
 		}
 
 		if (param_type(handle) == PARAM_TYPE_INT32) {
-			if (!std::isfinite(value) || value != std::floor(value) || std::fabs(value) > 2147483647.) {
+			// PX4 builds with -Werror=float-equal, so the fractional part is compared with zero
+			if (!std::isfinite(value) || std::fabs(value - std::floor(value)) > 0. || std::fabs(value) > 2147483647.) {
 				if (num_not_integer < 64) {
 					snprintf(not_integer[num_not_integer++], sizeof(not_integer[0]), "%s", name);
 				}
