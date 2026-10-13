@@ -32,6 +32,14 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   configurations gave no finding before. New example
   `examples/quad_no_positions.params`. Of PX4's own airframe scripts only
   `1002_standard_vtol.hil` is affected, whose forward rotor is not counted.
+- Rule CA012 (error): the thrust of a rotor points down or backwards, for
+  example a lift rotor with `CA_ROTORn_AZ 1`, a forward rotor with
+  `CA_ROTORn_AX -1`, or a negative `CA_ROTORn_CT`. Such configurations gave no
+  finding before. Multirotors with rotors along other axes than the vertical,
+  such as PX4's omnicopter airframes, are left alone. New examples
+  `examples/quad_rotor_down.params` and
+  `examples/standard_vtol_pusher_backwards.params`. None of PX4's own airframe
+  scripts is affected.
 - Rule CA030 (error): a line of the parameter file could not be used, for
   example a value with a decimal comma. Rule CA031 (warning): a `CA_*`
   parameter does not exist in the PX4 version of the engine, for example a

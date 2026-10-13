@@ -149,6 +149,17 @@ class WithEngine(unittest.TestCase):
         self.assertEqual(self.found("examples/standard_vtol_pusher_offset.params"), ["CA010", "CA011"])
         self.assertEqual(self.found("examples/quad_wrong_spin.params"), ["CA020"])
 
+    def test_thrust_in_the_wrong_direction(self):
+        for example, axis, motor in (
+            ("examples/quad_rotor_down.params", "thrust_z", "motor1"),
+            ("examples/standard_vtol_pusher_backwards.params", "thrust_x", "motor4"),
+        ):
+            code, stdout, _ = run("--engine", ENGINE, "--format", "json", example)
+            self.assertEqual(code, 1, example)
+            findings = json.loads(stdout)["findings"]
+            found = [(item["rule"], item["level"], item["axis"], item["actuators"]) for item in findings]
+            self.assertEqual(found, [("CA012", "error", axis, [motor])], example)
+
     def test_needed_axis_without_control(self):
         code, stdout, _ = run("--engine", ENGINE, "--format", "json", "examples/quad_no_positions.params")
         self.assertEqual(code, 1)

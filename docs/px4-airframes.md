@@ -60,4 +60,7 @@ so none is stopped. No motor is stopped in hover or in a transition, and none
 in any phase for the other airframe types.
 
 The limit of rule CA010 was chosen with these scripts: the omnicopter airframes
-have thrust gains of 1.66, below the default limit of 2.0.
+have thrust gains of 1.66, below the default limit of 2.0. The same two
+airframes, `8011_gz_omnicopter` and `10019_gazebo-classic_omnicopter`, are why
+rule CA012 leaves a multirotor alone whose rotors do not all act along the
+vertical: two of their eight rotors point backwards on purpose.

@@ -119,6 +119,66 @@ class Rules(unittest.TestCase):
         self.assertEqual(rules(result), ["CA011"])
         self.assertEqual(result.findings[0].actuators, ["motor0"])
 
+    def test_ca012_thrust_down(self):
+        one_down = matrix({"thrust_z": [-6.5, 6.5]}, [{"thrust_z": -1}, {"thrust_z": 1}])
+        ignore = Options(ignore=frozenset({"CA005"}))
+
+        for airframe in (0, 2, 3, 4, 8):
+            result = check(engine_result(one_down, ca_airframe=airframe), ignore)
+            self.assertEqual(rules(result), ["CA012"], airframe)
+            finding = result.findings[0]
+            self.assertEqual((finding.level, finding.matrix, finding.axis), ("error", 0, "thrust_z"))
+            self.assertEqual(finding.actuators, ["motor1"])
+            self.assertIn("motor1: PX4 takes the thrust as pointing down", finding.message)
+
+        # PX4 reads the rotor axis for a multirotor, but not for a multirotor with tilt
+        message = check(engine_result(one_down, ca_airframe=0), ignore).findings[0].message
+        self.assertTrue(message.endswith("Check the sign of CA_ROTORn_AZ and CA_ROTORn_CT"), message)
+        message = check(engine_result(one_down, ca_airframe=8), ignore).findings[0].message
+        self.assertTrue(message.endswith("Check the sign of CA_ROTORn_CT"), message)
+
+    def test_ca012_thrust_backwards(self):
+        pusher = matrix(
+            {"thrust_x": [0, 0, -6.5], "thrust_z": [-6.5, -6.5, 0]},
+            [{"thrust_z": -1}, {"thrust_z": -1}, {"thrust_x": -1}],
+        )
+        ignore = Options(ignore=frozenset({"CA005"}))
+        result = check(engine_result(pusher, ca_airframe=2), ignore)
+        found = [(item.rule, item.axis, item.actuators) for item in result.findings]
+        self.assertEqual(found, [("CA012", "thrust_x", ["motor2"])])
+        self.assertIn("pointing backwards (negative thrust_x effectiveness)", result.findings[0].message)
+        self.assertTrue(result.findings[0].message.endswith("CA_ROTORn_AX and CA_ROTORn_CT"))
+        # the rotors of a fixed-wing always point forwards, only the thrust coefficient can turn them
+        plane = matrix({"thrust_x": [-6.5, 0]}, [{"thrust_x": -1}, {}], types=["motor", "servo"])
+        message = check(engine_result(plane, ca_airframe=1), ignore).findings[0].message
+        self.assertTrue(message.endswith("Check the sign of CA_ROTORn_CT"), message)
+
+    def test_ca012_direction_is_the_largest_thrust_axis(self):
+        ignore = Options(ignore=frozenset({"CA005"}))
+        # a forward rotor that is tilted down a little, and a lift rotor that is tilted back a little
+        tilted = matrix({"thrust_x": [6.4, -1.1], "thrust_z": [1.1, -6.4]}, [{"thrust_x": 1}, {"thrust_z": -1}])
+        self.assertEqual(rules(check(engine_result(tilted, ca_airframe=2), ignore)), [])
+        # no single largest axis, and no thrust at all
+        unclear = matrix({"thrust_x": [-4.6, 0], "thrust_z": [4.6, 0]}, [{"thrust_x": -1}, {}])
+        self.assertEqual(rules(check(engine_result(unclear, ca_airframe=2), ignore)), [])
+
+    def test_ca012_leaves_other_vehicles_alone(self):
+        ignore = Options(ignore=frozenset({"CA005"}))
+        down_and_back = matrix({"thrust_x": [-6.5, 0], "thrust_z": [0, 6.5]}, [{"thrust_x": -1}, {"thrust_z": 1}])
+        # an omnidirectional multirotor has rotors in every direction
+        self.assertEqual(rules(check(engine_result(down_and_back, ca_airframe=0), ignore)), [])
+        sideways = matrix({"thrust_y": [6.5, 0], "thrust_z": [0, 6.5]}, [{"thrust_y": 1}, {"thrust_z": 1}])
+        self.assertEqual(rules(check(engine_result(sideways, ca_airframe=0), ignore)), [])
+        # nothing is known about what other vehicle types need, for example an underwater vehicle
+        self.assertEqual(rules(check(engine_result(down_and_back, ca_airframe=7))), [])
+        self.assertEqual(rules(check(engine_result(down_and_back))), [])
+        # the other VTOLs are checked in both directions
+        standard_vtol = check(engine_result(down_and_back, ca_airframe=2), ignore)
+        self.assertEqual([item.axis for item in standard_vtol.findings], ["thrust_z", "thrust_x"])
+        # a servo is not a rotor
+        servos = matrix({"thrust_z": [6.5, 6.5]}, [{"thrust_z": 1}, {"thrust_z": 1}], types=["servo", "servo"])
+        self.assertEqual(rules(check(engine_result(servos, ca_airframe=2), ignore)), [])
+
     def test_ca020_unused_motor(self):
         unused = matrix(
             {"roll": [1, 1], "pitch": [1, -1]},

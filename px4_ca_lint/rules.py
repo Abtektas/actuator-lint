@@ -35,6 +35,9 @@ _NEEDED_AXES = {
     4: _HOVER_AXES,  # tailsitter VTOL
     8: _HOVER_AXES,  # multirotor with tilt
 }
+# CA012: the CA_AIRFRAME values for which PX4 does not read the rotor axis CA_ROTORn_AX, _AY, _AZ
+# (fixed-wing: always forwards, multirotor with tilt: always upwards)
+_FIXED_AXIS_AIRFRAMES = (1, 8)
 
 
 @dataclass(frozen=True)
@@ -54,6 +57,7 @@ RULES = {
         Rule("CA005", ERROR, "an axis the vehicle cannot be flown without is not controlled"),
         Rule("CA010", WARNING, "thrust gain above the limit"),
         Rule("CA011", WARNING, "thrust command to an actuator that produces no thrust on that axis"),
+        Rule("CA012", ERROR, "the thrust of a rotor points down or backwards"),
         Rule("CA020", WARNING, "a motor is not used for roll or pitch"),
         Rule("CA021", WARNING, "a rotor is configured but not counted by CA_ROTOR_COUNT"),
         Rule("CA022", WARNING, "a rotor is assigned to a tilt servo that does not exist"),
@@ -219,6 +223,62 @@ def _check_cross_command(matrix: dict, options: Options, result: Result) -> None
                     matrix=matrix["index"],
                     axis=axis,
                     actuators=affected,
+                )
+            )
+
+
+def _thrust_axis(thrust: dict[str, float]) -> str | None:
+    """The thrust axis a rotor acts on most, None when it has no thrust or no single such axis."""
+    axis = max(THRUST_AXES, key=lambda name: abs(thrust[name]))
+    others = [abs(thrust[name]) for name in THRUST_AXES if name != axis]
+
+    if abs(thrust[axis]) < _EFFECTIVENESS_ZERO or abs(thrust[axis]) <= max(others):
+        return None
+
+    return axis
+
+
+def _check_thrust_direction(matrix: dict, airframe: int | None, result: Result) -> None:
+    # the vehicle types whose rotors lift the vehicle or push it forwards, the same as for CA005
+    if airframe not in _NEEDED_AXES:
+        return
+
+    motors = []
+
+    for position, (actuator, label) in enumerate(zip(matrix["actuators"], _labels(matrix))):
+        if actuator["type"] == "motor":
+            thrust = {axis: matrix["effectiveness"][axis][position] for axis in THRUST_AXES}
+            motors.append((label, _thrust_axis(thrust), thrust))
+
+    # the body axes of PX4 point forwards, to the right and down
+    down = [label for label, axis, thrust in motors if axis == "thrust_z" and thrust[axis] > 0]
+    backwards = [label for label, axis, thrust in motors if axis == "thrust_x" and thrust[axis] < 0]
+
+    if airframe == 0:
+        # a multirotor has no rotor for forward thrust, and one with rotors along other axes than
+        # the vertical is an omnidirectional vehicle, whose rotors may point anywhere
+        backwards = []
+
+        if any(axis not in (None, "thrust_z") for _, axis, _ in motors):
+            down = []
+
+    axis_parameter = "" if airframe in _FIXED_AXIS_AIRFRAMES else "CA_ROTORn_{} and "
+    cases = (
+        (down, "thrust_z", "down", "positive", "the rotors that lift this vehicle have to point up", "AZ"),
+        (backwards, "thrust_x", "backwards", "negative", "a rotor for forward thrust has to point forwards", "AX"),
+    )
+
+    for wrong, axis, direction, value, needed, parameter in cases:
+        if wrong:
+            result.findings.append(
+                _finding(
+                    "CA012",
+                    f"{_join(wrong)}: PX4 takes the thrust as pointing {direction} ({value} {axis} "
+                    f"effectiveness), but {needed}. Check the sign of "
+                    f"{axis_parameter.format(parameter)}CA_ROTORn_CT",
+                    matrix=matrix["index"],
+                    axis=axis,
+                    actuators=wrong,
                 )
             )
 
@@ -438,6 +498,7 @@ def check(
         _check_weak_axes(matrix, result)
         _check_thrust_gain(matrix, options, result)
         _check_cross_command(matrix, options, result)
+        _check_thrust_direction(matrix, engine_result.get("ca_airframe"), result)
         _check_unused_motor(matrix, result)
 
     if "error" not in engine_result:
