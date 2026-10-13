@@ -177,7 +177,11 @@ Accepted parameter files:
 | PX4 airframe script | `param set-default CA_ROTOR_COUNT 5` |
 | QGroundControl export | tab separated, `1  1  CA_ROTOR_COUNT  5  6` |
 
-Parameters that are not in the file keep PX4's default value. For an airframe
+Parameters that are not in the file keep PX4's default value. A line that looks
+like a parameter but cannot be read, for example a value with a decimal comma,
+is a finding ([CA030](rules/CA030.md)), and so is a `CA_*` parameter that the
+PX4 version of the engine does not have ([CA031](rules/CA031.md)): in both
+cases the report is not for the configuration in the file. For an airframe
 script, files it sources (such as `rc.fw_defaults`) are read when the script is
 inside a PX4 `ROMFS` directory; `if` blocks are not evaluated. The report says
 so when either applies.
@@ -212,11 +216,14 @@ the matrices and are not part of it.
 | [CA002](rules/CA002.md) | error | PX4 dropped a control axis |
 | [CA003](rules/CA003.md) | error | a matrix contains NaN or infinity |
 | [CA004](rules/CA004.md) | warning | PX4 ignores an axis with weak authority |
+| [CA005](rules/CA005.md) | error | an axis the vehicle cannot be flown without is not controlled |
 | [CA010](rules/CA010.md) | warning | thrust gain above the limit |
 | [CA011](rules/CA011.md) | warning | thrust command to an actuator that produces no thrust on that axis |
 | [CA020](rules/CA020.md) | warning | a motor is not used for roll or pitch |
 | [CA021](rules/CA021.md) | warning | a rotor is configured but not counted by `CA_ROTOR_COUNT` |
 | [CA022](rules/CA022.md) | warning | a rotor is assigned to a tilt servo that does not exist |
+| [CA030](rules/CA030.md) | error | a line of the parameter file could not be used |
+| [CA031](rules/CA031.md) | warning | a control allocation parameter does not exist in this PX4 version |
 
 CA002 needs a PX4 version newer than v1.17.0; with the prebuilt engines the
 report says that it was not checked.

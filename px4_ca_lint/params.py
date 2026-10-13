@@ -21,6 +21,10 @@ FORMATS = ("plain", "airframe", "qgc")
 
 # PX4 parameter names are at most 16 characters.
 _NAME = re.compile(r"^[A-Z][A-Z0-9_]{0,15}$")
+# A decimal number as the engine reads it. Python's float() accepts more ("1_0", "nan", digits of
+# other scripts), which the engine would read differently or not at all.
+_NUMBER = re.compile(r"^[+-]?(?:[0-9]+\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?$")
+_MAX_VALUE_LENGTH = 40
 _PARAM_SET = re.compile(r"^\s*param\s+(?:set|set-default)\s+(\S+)\s+(\S+)")
 _SOURCED = re.compile(r"^\s*(?:\.|source)\s+(\S+)")
 _MAX_SOURCE_DEPTH = 5
@@ -40,6 +44,8 @@ class ParamFile:
     # name -> value as written in the file; the last assignment wins
     params: dict[str, str] = field(default_factory=dict)
     notes: list[str] = field(default_factory=list)
+    # lines that look like a parameter but could not be used, so the result is not for the whole file
+    unread: list[str] = field(default_factory=list)
     # name -> sourced file that set it, "" for the file itself
     origins: dict[str, str] = field(default_factory=dict, repr=False)
 
@@ -56,22 +62,33 @@ def detect_format(text: str) -> str:
 
 
 def _is_number(value: str) -> bool:
-    try:
-        return math.isfinite(float(value))
+    return (
+        len(value) <= _MAX_VALUE_LENGTH and bool(_NUMBER.match(value)) and math.isfinite(float(value))
+    )
 
-    except ValueError:
-        return False
+
+def _skipped(result: ParamFile, name: str | None, message: str) -> None:
+    """Record a line that was not used.
+
+    In a parameter file every line counts. In an airframe script only lines that set a control
+    allocation parameter do: other parameters often get their value from a shell variable.
+    """
+    if result.format != "airframe" or name is None or name.startswith("CA_") or not _NAME.match(name):
+        result.unread.append(message)
+
+    else:
+        result.notes.append(message)
 
 
 def _store(result: ParamFile, line_number: int, name: str, value: str, origin: str = "") -> None:
     where = f"{origin} line {line_number}" if origin else f"line {line_number}"
 
     if not _NAME.match(name):
-        result.notes.append(f"{where}: '{name}' is not a valid parameter name, skipped")
+        _skipped(result, name, f"{where}: '{name}' is not a valid parameter name, skipped")
         return
 
     if not _is_number(value):
-        result.notes.append(f"{where}: {name} has the non-numeric value '{value}', skipped")
+        _skipped(result, name, f"{where}: {name} has the value '{value}', which is not a number, skipped")
         return
 
     # an airframe script overriding a sourced default is normal, the same file doing it is not
@@ -92,7 +109,7 @@ def _parse_plain(result: ParamFile, lines: list[str]) -> None:
             continue
 
         if len(fields) != 2:
-            result.notes.append(f"line {number}: expected 'NAME VALUE', skipped")
+            _skipped(result, None, f"line {number}: expected 'NAME VALUE', skipped")
             continue
 
         _store(result, number, fields[0], fields[1])
@@ -145,7 +162,7 @@ def _parse_airframe(
                 continue
 
             try:
-                text = found.read_text(encoding="utf-8", errors="replace")
+                text = found.read_text(encoding="utf-8-sig", errors="replace")
 
             except OSError:
                 result.notes.append(f"the sourced file '{found}' could not be read")
@@ -174,7 +191,7 @@ def _parse_qgc(result: ParamFile, lines: list[str]) -> None:
         fields = line.split("\t")
 
         if len(fields) < 5:
-            result.notes.append(f"line {number}: expected 5 tab-separated fields, skipped")
+            _skipped(result, None, f"line {number}: expected 5 tab-separated fields, skipped")
             continue
 
         components.add((fields[0].strip(), fields[1].strip()))
@@ -217,7 +234,8 @@ def parse_text(
 
 def parse_file(path: str | Path, file_format: str | None = None) -> ParamFile:
     try:
-        text = Path(path).read_text(encoding="utf-8", errors="replace")
+        # utf-8-sig drops the byte order mark some editors write at the start of a file
+        text = Path(path).read_text(encoding="utf-8-sig", errors="replace")
 
     except OSError as error:
         raise ParamFileError(f"{path}: {error.strerror}") from error

@@ -6,6 +6,7 @@
  "init.d/1002_standard_vtol.hil": {
   "status": "checked",
   "findings": [
+   "CA005",
    "CA021"
   ]
  },

@@ -23,11 +23,32 @@ class Plain(unittest.TestCase):
         self.assertEqual(result.params, {"CA_AIRFRAME": "2", "CA_ROTOR4_PZ": "-0.05"})
         self.assertEqual(result.notes, [])
 
-    def test_bad_lines_are_skipped_with_a_note(self):
-        result = parse_text("CA_AIRFRAME 2\nca_lower 1\nCA_ROTOR0_PX abc\nCA_ROTOR0_PY nan\nONLYNAME\n")
+    def test_bad_lines_are_not_used_and_recorded(self):
+        result = parse_text("CA_AIRFRAME 2\nca_lower 1\nCA_ROTOR0_PX abc\nCA_ROTOR0_PY nan\nONLYNAME\nMPC_X 1,5\n")
         self.assertEqual(result.params, {"CA_AIRFRAME": "2"})
-        self.assertEqual(len(result.notes), 4)
-        self.assertIn("line 2", result.notes[0])
+        self.assertEqual(result.notes, [])
+        # in a parameter file every line counts, whatever the parameter
+        self.assertEqual(len(result.unread), 5)
+        self.assertIn("line 2: 'ca_lower' is not a valid parameter name", result.unread[0])
+        self.assertIn("line 3: CA_ROTOR0_PX has the value 'abc', which is not a number", result.unread[1])
+        self.assertIn("line 5: expected 'NAME VALUE'", result.unread[3])
+
+    def test_only_numbers_the_engine_reads_the_same_way(self):
+        good = ("1", "-0.05", "+2", ".5", "5.", "1e-3", "2.5E+2", "0000.1")
+        bad = ("1_0", "\uff14", "nan", "inf", "0x10", "1,0", "1e", "--1", "1.0f", "9" * 41, "1e999")
+        text = "".join(f"P{index} {value}\n" for index, value in enumerate(good + bad))
+        result = parse_text(text)
+        self.assertEqual(list(result.params.values()), list(good))
+        self.assertEqual(len(result.unread), len(bad))
+
+    def test_byte_order_mark(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bom.params"
+            path.write_bytes(b"\xef\xbb\xbfCA_AIRFRAME 2\nCA_ROTOR_COUNT 5\n")
+            result = parse_file(path)
+
+        self.assertEqual(result.params, {"CA_AIRFRAME": "2", "CA_ROTOR_COUNT": "5"})
+        self.assertEqual(result.unread, [])
 
     def test_last_value_wins(self):
         result = parse_text("CA_ROTOR_COUNT 4\nCA_ROTOR_COUNT 5\n")
@@ -56,10 +77,19 @@ class Airframe(unittest.TestCase):
         self.assertEqual(result.params, {"CA_AIRFRAME": "2", "CA_ROTOR_COUNT": "5", "CA_ROTOR4_AX": "1"})
 
     def test_limits_are_reported(self):
-        notes = "\n".join(parse_text(self.SCRIPT).notes)
-        self.assertIn("non-numeric", notes)
+        result = parse_text(self.SCRIPT)
+        notes = "\n".join(result.notes)
+        self.assertIn("which is not a number", notes)
         self.assertIn("was not found", notes)
         self.assertIn("conditional", notes)
+        # a value from a shell variable is common for other parameters and only a note
+        self.assertEqual(result.unread, [])
+
+    def test_a_control_allocation_line_that_cannot_be_used(self):
+        result = parse_text("param set-default CA_AIRFRAME 2\nparam set-default CA_ROTOR_COUNT ${COUNT}\n")
+        self.assertEqual(result.params, {"CA_AIRFRAME": "2"})
+        self.assertEqual(len(result.unread), 1)
+        self.assertIn("line 2: CA_ROTOR_COUNT has the value '${COUNT}'", result.unread[0])
 
 
 class SourcedFiles(unittest.TestCase):

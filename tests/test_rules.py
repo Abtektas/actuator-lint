@@ -32,8 +32,11 @@ def engine_result(*matrices, **overrides):
 
 def healthy():
     return matrix(
-        {"roll": [-1, 1], "pitch": [1, 1], "thrust_z": [-6.5, -6.5]},
-        [{"roll": -0.7, "pitch": 0.7, "thrust_z": -1}, {"roll": 0.7, "pitch": 0.7, "thrust_z": -1}],
+        {"roll": [-1, 1], "pitch": [1, 1], "yaw": [0.3, -0.3], "thrust_z": [-6.5, -6.5]},
+        [
+            {"roll": -0.7, "pitch": 0.7, "yaw": 1, "thrust_z": -1},
+            {"roll": 0.7, "pitch": 0.7, "yaw": -1, "thrust_z": -1},
+        ],
     )
 
 
@@ -201,10 +204,95 @@ class Rules(unittest.TestCase):
     def test_ca022_only_where_px4_reads_the_tilt_assignment(self):
         params = {"CA_ROTOR0_TILT": "2"}
 
-        for airframe in (0, 1, 2, 4):
+        for airframe in (0, 1, 4):
             self.assertEqual(rules(check(engine_result(healthy(), ca_airframe=airframe), params=params)), [])
 
+        # the stand-in has no forward thrust, which a standard VTOL needs
+        self.assertEqual(rules(check(engine_result(healthy(), ca_airframe=2), params=params)), ["CA005"])
+
         self.assertEqual(rules(check(engine_result(healthy(), ca_airframe=3))), [])
+
+    def test_ca005_a_needed_axis_without_any_effect(self):
+        no_yaw = matrix(
+            {"roll": [-1, 1], "pitch": [1, 1], "thrust_z": [-6.5, -6.5]},
+            [{"roll": -0.7, "pitch": 0.7, "thrust_z": -1}, {"roll": 0.7, "pitch": 0.7, "thrust_z": -1}],
+        )
+        result = check(engine_result(no_yaw, ca_airframe=0, effectiveness_source="Multirotor"))
+        self.assertEqual(rules(result), ["CA005"])
+        finding = result.findings[0]
+        self.assertEqual((finding.level, finding.axis, finding.matrix), ("error", "yaw", None))
+        self.assertIn("yaw is not controlled: no actuator has an effect on it", finding.message)
+        self.assertIn("A vehicle with CA_AIRFRAME 0 (Multirotor) needs it", finding.message)
+        # a flying wing has no yaw control and a glider no thrust
+        self.assertEqual(rules(check(engine_result(no_yaw, ca_airframe=1))), [])
+        # nothing is known about what other vehicle types need
+        self.assertEqual(rules(check(engine_result(no_yaw, ca_airframe=7))), [])
+        self.assertEqual(rules(check(engine_result(no_yaw))), [])
+
+    def test_ca005_every_missing_axis_is_reported(self):
+        only_thrust = matrix({"thrust_z": [-6.5, -6.5]}, [{"thrust_z": -1}, {"thrust_z": -1}])
+        result = check(engine_result(only_thrust, ca_airframe=0))
+        self.assertEqual([finding.axis for finding in result.findings], ["roll", "pitch", "yaw"])
+        standard_vtol = check(engine_result(healthy(), ca_airframe=2))
+        self.assertEqual([finding.axis for finding in standard_vtol.findings], ["thrust_x"])
+
+    def test_ca005_another_matrix_can_control_the_axis(self):
+        motors = matrix({"thrust_z": [-6.5, -6.5]}, [{"thrust_z": -1}, {"thrust_z": -1}])
+        surfaces = matrix(
+            {"roll": [1, -1], "pitch": [1, 1], "yaw": [0.2, 0.2]},
+            [{"roll": 0.5, "pitch": 0.5}, {"roll": -0.5, "pitch": 0.5}],
+            types=["servo", "servo"],
+            index=1,
+        )
+        self.assertEqual(rules(check(engine_result(motors, surfaces, ca_airframe=4))), [])
+
+    def test_ca005_names_the_cause_px4_reports(self):
+        weak = matrix(
+            {"roll": [-1, 1], "pitch": [1, 1], "thrust_z": [-6.5, -6.5]},
+            [{"roll": -0.7, "pitch": 0.7, "thrust_z": -1}, {"roll": 0.7, "pitch": 0.7, "thrust_z": -1}],
+            weak_axes_zeroed=["yaw"],
+        )
+        result = check(engine_result(weak, ca_airframe=0))
+        self.assertEqual(rules(result), ["CA004", "CA005"])
+        self.assertIn("see CA004", result.findings[1].message)
+        # bit 2 is yaw
+        dropped = dict(healthy(), dropped_axes_bitmask=1 << 2)
+        result = check(engine_result(dropped, ca_airframe=0))
+        self.assertEqual(rules(result), ["CA002", "CA005"])
+        self.assertIn("see CA002", result.findings[1].message)
+
+    def test_ca005_not_on_top_of_ca001_and_ca003(self):
+        failed = {"error": "PX4 did not produce an effectiveness matrix", "ca_airframe": 0}
+        self.assertEqual(rules(check(failed)), ["CA001"])
+        empty = engine_result(matrix({}, []), num_motors=0, ca_airframe=0)
+        self.assertEqual(rules(check(empty)), ["CA001"])
+        broken = matrix({"roll": [None, 1]}, [{"roll": 1}, {"roll": 1}])
+        self.assertEqual(rules(check(engine_result(broken, ca_airframe=0))), ["CA003"])
+
+    def test_ca030_lines_that_could_not_be_used(self):
+        unread = ["line 3: CA_ROTOR4_PZ has the value '-0,05', which is not a number, skipped"]
+        result = check(engine_result(healthy()), params={"CA_AIRFRAME": "0"}, unread=unread)
+        self.assertEqual(rules(result), ["CA030"])
+        self.assertEqual((result.findings[0].level, result.findings[0].message), ("error", unread[0]))
+        # rules that look at the input do not run without the input
+        self.assertEqual(rules(check(engine_result(healthy()), unread=unread)), [])
+
+    def test_ca030_integer_parameter_with_another_value(self):
+        engine = engine_result(healthy(), not_integer_parameters=["CA_ROTOR_COUNT"])
+        result = check(engine, params={"CA_ROTOR_COUNT": "3.6"})
+        self.assertEqual(rules(result), ["CA030"])
+        self.assertIn("CA_ROTOR_COUNT is an integer parameter, but the value is '3.6'", result.findings[0].message)
+
+    def test_ca031_unknown_control_allocation_parameters(self):
+        unknown = ["MPC_NEW", "CA_ROTOR4_PZZ", "CA_ABC"]
+        engine = engine_result(healthy(), unknown_parameters=unknown, px4_version="v1.17.0")
+        result = check(engine, params={})
+        self.assertEqual(rules(result), ["CA031"])
+        self.assertEqual(result.findings[0].level, "warning")
+        self.assertIn("CA_ABC, CA_ROTOR4_PZZ: not a parameter of PX4 v1.17.0, ignored", result.findings[0].message)
+        self.assertNotIn("MPC_NEW", result.findings[0].message)
+        # parameters of other modules are not this tool's business
+        self.assertEqual(rules(check(engine_result(healthy(), unknown_parameters=["MPC_NEW"]), params={})), [])
 
     def test_ignore(self):
         result = check(

@@ -14,6 +14,12 @@
    "actuators": [
     "motor4"
    ]
+  },
+  {
+   "rule": "CA005",
+   "matrix": null,
+   "axis": "thrust_x",
+   "actuators": []
   }
  ],
  "matrices": [

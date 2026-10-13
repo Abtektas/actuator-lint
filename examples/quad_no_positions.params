@@ -1,0 +1,9 @@
+# A quadrotor whose rotor positions were never entered: all four rotors sit at
+# the centre of gravity, so they produce no roll and no pitch torque.
+# Expected: CA005 for roll and for pitch.
+CA_AIRFRAME 0
+CA_ROTOR_COUNT 4
+CA_ROTOR0_KM 0.05
+CA_ROTOR1_KM 0.05
+CA_ROTOR2_KM -0.05
+CA_ROTOR3_KM -0.05

@@ -5,7 +5,7 @@ from px4_ca_lint import DISCLAIMER
 from px4_ca_lint.params import ParamFile
 from px4_ca_lint.report import render_json, render_markdown, render_text
 from px4_ca_lint.report import build_report as _build_report
-from px4_ca_lint.rules import check
+from px4_ca_lint.rules import Options, check
 
 ZERO = [0, 0]
 PHASES = ("hover", "transition_to_forward", "forward", "transition_to_hover")
@@ -57,7 +57,9 @@ def engine_result(**matrix_overrides):
 
 
 def build_report(parsed, result):
-    return _build_report(parsed, result, check(result, params=parsed.params))
+    # the stand-in matrix is not a vehicle that could fly, which is not what these tests are about
+    options = Options(ignore=frozenset({"CA005"}))
+    return _build_report(parsed, result, check(result, options, params=parsed.params))
 
 
 def param_file():

@@ -169,7 +169,7 @@ def _analyse(path: str, args: argparse.Namespace) -> dict:
     engine_result = run_engine(engine, param_file.params)
     check_px4_version(px4, engine, engine_result)
     options = Options(max_thrust_gain=args.max_thrust_gain, ignore=args.ignore)
-    checked = check(engine_result, options, param_file.params)
+    checked = check(engine_result, options, param_file.params, param_file.unread)
     return single.build_report(param_file, engine_result, checked)
 
 

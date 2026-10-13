@@ -6,7 +6,7 @@ import json
 
 from . import DISCLAIMER, __version__
 from .params import ParamFile
-from .rules import AXES, ERROR, RULES, WARNING, Result, rule_url
+from .rules import AXES, ERROR, RULES, WARNING, Result, axis_status, rule_url
 
 _MAX_LISTED_UNKNOWN = 10
 
@@ -26,27 +26,12 @@ def _label(actuator: dict) -> str:
 
 
 def _axis_summary(matrix: dict) -> list[dict]:
-    dropped = matrix.get("dropped_axes_bitmask")
     summary = []
 
-    for bit, axis in enumerate(AXES):
-        row = matrix["effectiveness"][axis]
+    for axis in AXES:
         # null values mean PX4 produced NaN or infinity
-        authority = sum(abs(value) for value in row if value is not None)
-
-        if axis in matrix["weak_axes_zeroed"]:
-            status = "weak, zeroed by PX4"
-
-        elif dropped is not None and dropped & (1 << bit):
-            status = "dropped by PX4"
-
-        elif authority > 0:
-            status = "controlled"
-
-        else:
-            status = "not controlled"
-
-        summary.append({"axis": axis, "status": status, "authority": authority})
+        authority = sum(abs(value) for value in matrix["effectiveness"][axis] if value is not None)
+        summary.append({"axis": axis, "status": axis_status(matrix, axis), "authority": authority})
 
     return summary
 

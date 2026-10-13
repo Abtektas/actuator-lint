@@ -30,6 +30,10 @@ removed or changes meaning. Adding a field does not increase it.
 `dropped_axes_bitmask` is `null` when the PX4 version the engine was built
 against does not report dropped axes (PX4 v1.17.0 does not).
 
+`not_integer_parameters` was added with tool 0.4.0: the integer parameters of
+the input whose value is not an integer. The engine leaves them at their
+default; engines of earlier tool versions round the value.
+
 `flight_phases` was added with tool 0.4.0: the motors PX4 stops in each flight
 phase, and whether PX4 recomputes its matrices for the phase. Engines of
 earlier tool versions do not write it; the tool then says so in the report.

@@ -149,6 +149,60 @@ class WithEngine(unittest.TestCase):
         self.assertEqual(self.found("examples/standard_vtol_pusher_offset.params"), ["CA010", "CA011"])
         self.assertEqual(self.found("examples/quad_wrong_spin.params"), ["CA020"])
 
+    def test_needed_axis_without_control(self):
+        code, stdout, _ = run("--engine", ENGINE, "--format", "json", "examples/quad_no_positions.params")
+        self.assertEqual(code, 1)
+        findings = json.loads(stdout)["findings"]
+        found = [(finding["rule"], finding["axis"]) for finding in findings]
+        self.assertEqual(found, [("CA005", "roll"), ("CA005", "pitch")])
+        self.assertEqual({finding["level"] for finding in findings}, {"error"})
+
+    def test_typing_mistakes_are_findings(self):
+        example = "examples/standard_vtol_typing_mistakes.params"
+        code, stdout, _ = run("--engine", ENGINE, "--format", "json", example)
+        self.assertEqual(code, 1)
+        report = json.loads(stdout)
+        self.assertEqual([finding["rule"] for finding in report["findings"]], ["CA030", "CA031"])
+        self.assertIn("line 30: CA_ROTOR4_PZ has the value '-0,05'", report["findings"][0]["message"])
+        self.assertIn("CA_ROTOR3_PYY", report["findings"][1]["message"])
+        self.assertNotIn("CA_ROTOR4_PZ", report["input"]["parameters"])
+        self.assertEqual(run("--engine", ENGINE, "--ignore", "CA030", example)[0], 0)
+
+    def test_integer_parameter_with_a_fraction(self):
+        from px4_ca_lint.engine import run_engine
+
+        if "not_integer_parameters" not in run_engine(Path(ENGINE), {"CA_AIRFRAME": "0"}):
+            self.skipTest("the engine was built before it refused such values")
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fraction.params"
+            path.write_text("CA_AIRFRAME 2.5\nCA_ROTOR_COUNT 4\n")
+            code, stdout, _ = run("--engine", ENGINE, "--format", "json", str(path))
+
+        self.assertEqual(code, 1)
+        report = json.loads(stdout)
+        # PX4's default, a multirotor, and not the tiltrotor that rounding would give
+        self.assertEqual(report["airframe"]["ca_airframe"], 0)
+        message = report["findings"][0]["message"]
+        self.assertIn("CA_AIRFRAME is an integer parameter, but the value is '2.5'", message)
+        self.assertEqual(report["findings"][0]["rule"], "CA030")
+
+    def test_byte_order_mark_and_other_digits(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bom.params"
+            text = Path("examples/standard_vtol.params").read_text()
+            path.write_bytes(b"\xef\xbb\xbf" + text.encode())
+            report = self.report(str(path))
+            self.assertEqual(report["airframe"]["ca_airframe"], 2)
+            self.assertEqual(report["summary"], {"errors": 0, "warnings": 0})
+            # a digit that is not ASCII used to end in a traceback
+            path.write_text(text + "CA_ROTOR4_PZ \uff14\n")
+            code, stdout, stderr = run("--engine", ENGINE, str(path))
+
+        self.assertEqual(code, 1)
+        self.assertNotIn("Traceback", stderr)
+        self.assertIn("error CA030", stdout)
+
     def test_missing_rotor_count(self):
         code, stdout, _ = run("--engine", ENGINE, "--format", "json", "examples/no_rotors.params")
         self.assertEqual(code, 1)

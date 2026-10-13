@@ -24,6 +24,17 @@ _EFFECTIVENESS_ZERO = 1e-6
 _ROTOR_GEOMETRY = re.compile(r"^CA_ROTOR(\d+)_(?:PX|PY|PZ|AX|AY|TILT)$")
 # CA022: the CA_AIRFRAME values for which PX4 reads CA_ROTORn_TILT (tiltrotor VTOL, multirotor with tilt)
 _TILT_AIRFRAMES = (3, 8)
+# CA005: the axes a vehicle of each CA_AIRFRAME value cannot be flown without. Every airframe script
+# of PX4 v1.17.0 that PX4 can allocate controls them, see docs/px4-airframes.md.
+_HOVER_AXES = ("roll", "pitch", "yaw", "thrust_z")
+_NEEDED_AXES = {
+    0: _HOVER_AXES,  # multirotor
+    1: ("roll", "pitch"),  # fixed-wing: no yaw for a flying wing, no thrust for a glider
+    2: (*_HOVER_AXES, "thrust_x"),  # standard VTOL: hover and forward thrust
+    3: _HOVER_AXES,  # tiltrotor VTOL, in the hover position that the matrices are for
+    4: _HOVER_AXES,  # tailsitter VTOL
+    8: _HOVER_AXES,  # multirotor with tilt
+}
 
 
 @dataclass(frozen=True)
@@ -40,11 +51,14 @@ RULES = {
         Rule("CA002", ERROR, "PX4 dropped a control axis"),
         Rule("CA003", ERROR, "a matrix contains NaN or infinity"),
         Rule("CA004", WARNING, "PX4 ignores an axis with weak authority"),
+        Rule("CA005", ERROR, "an axis the vehicle cannot be flown without is not controlled"),
         Rule("CA010", WARNING, "thrust gain above the limit"),
         Rule("CA011", WARNING, "thrust command to an actuator that produces no thrust on that axis"),
         Rule("CA020", WARNING, "a motor is not used for roll or pitch"),
         Rule("CA021", WARNING, "a rotor is configured but not counted by CA_ROTOR_COUNT"),
         Rule("CA022", WARNING, "a rotor is assigned to a tilt servo that does not exist"),
+        Rule("CA030", ERROR, "a line of the parameter file could not be used"),
+        Rule("CA031", WARNING, "a control allocation parameter does not exist in this PX4 version"),
     )
 }
 
@@ -106,6 +120,23 @@ def _has_non_finite(matrix: dict) -> bool:
 
 def _join(names: list[str]) -> str:
     return ", ".join(names)
+
+
+def axis_status(matrix: dict, axis: str) -> str:
+    """What PX4 does with one axis of a matrix: controlled, or why not."""
+    dropped = matrix.get("dropped_axes_bitmask")
+
+    if axis in matrix["weak_axes_zeroed"]:
+        return "weak, zeroed by PX4"
+
+    if dropped is not None and dropped & (1 << AXES.index(axis)):
+        return "dropped by PX4"
+
+    # null values mean PX4 produced NaN or infinity
+    if any(value for value in matrix["effectiveness"][axis] if value is not None):
+        return "controlled"
+
+    return "not controlled"
 
 
 def _check_dropped_axes(matrix: dict, result: Result) -> None:
@@ -218,6 +249,69 @@ def _check_unused_motor(matrix: dict, result: Result) -> None:
             )
 
 
+def _check_needed_axes(engine_result: dict, result: Result) -> None:
+    matrices = engine_result.get("matrices", [])
+    needed = _NEEDED_AXES.get(engine_result.get("ca_airframe"), ())
+
+    # CA001 and CA003 already say that there is nothing to judge
+    if not matrices or any(_has_non_finite(matrix) for matrix in matrices):
+        return
+
+    if engine_result.get("num_motors", 0) + engine_result.get("num_servos", 0) == 0:
+        return
+
+    for axis in needed:
+        states = [axis_status(matrix, axis) for matrix in matrices]
+
+        if "controlled" in states:
+            continue
+
+        if "weak, zeroed by PX4" in states:
+            reason = "PX4 set its weak effectiveness values to zero, see CA004"
+
+        elif "dropped by PX4" in states:
+            reason = "PX4 dropped it, see CA002"
+
+        else:
+            reason = "no actuator has an effect on it"
+
+        name = engine_result.get("effectiveness_source")
+        vehicle = f"CA_AIRFRAME {engine_result['ca_airframe']}" + (f" ({name})" if name else "")
+        result.findings.append(
+            _finding(
+                "CA005",
+                f"{axis} is not controlled: {reason}. A vehicle with {vehicle} needs it",
+                axis=axis,
+            )
+        )
+
+
+def _check_input(engine_result: dict, params: dict[str, str], unread: list[str], result: Result) -> None:
+    for message in unread:
+        result.findings.append(_finding("CA030", message))
+
+    # the engine leaves an integer parameter at its default when the value is not an integer
+    for name in engine_result.get("not_integer_parameters", []):
+        result.findings.append(
+            _finding(
+                "CA030",
+                f"{name} is an integer parameter, but the value is '{params.get(name, '?')}'; "
+                "it was not used and PX4's default applies",
+            )
+        )
+
+    unknown = sorted(name for name in engine_result.get("unknown_parameters", []) if name.startswith("CA_"))
+
+    if unknown:
+        result.findings.append(
+            _finding(
+                "CA031",
+                f"{_join(unknown)}: not a parameter of PX4 {engine_result.get('px4_version')}, ignored. "
+                "Check the spelling, or the PX4 version the file is for",
+            )
+        )
+
+
 def _rotor_count(engine_result: dict, params: dict[str, str]) -> int | None:
     """The number of rotors PX4 uses, None when it is not known."""
     if "num_motors" in engine_result:
@@ -301,13 +395,21 @@ def _check_tilt_servos(engine_result: dict, params: dict[str, str], result: Resu
     )
 
 
-def check(engine_result: dict, options: Options = Options(), params: dict[str, str] | None = None) -> Result:
+def check(
+    engine_result: dict,
+    options: Options = Options(),
+    params: dict[str, str] | None = None,
+    unread: list[str] | None = None,
+) -> Result:
     """Apply the rules to the engine output.
 
-    params are the parameters of the input file; rules that look at the input are skipped
-    without them.
+    params are the parameters of the input file and unread the lines of it that could not be
+    used (ParamFile.unread); rules that look at the input are skipped without params.
     """
     result = Result()
+
+    if params is not None:
+        _check_input(engine_result, params, unread or [], result)
 
     if "error" in engine_result:
         result.findings.append(_finding("CA001", f"{engine_result['error']}"))
@@ -337,6 +439,9 @@ def check(engine_result: dict, options: Options = Options(), params: dict[str, s
         _check_thrust_gain(matrix, options, result)
         _check_cross_command(matrix, options, result)
         _check_unused_motor(matrix, result)
+
+    if "error" not in engine_result:
+        _check_needed_axes(engine_result, result)
 
     result.findings = [finding for finding in result.findings if finding.rule not in options.ignore]
     result.not_checked = {

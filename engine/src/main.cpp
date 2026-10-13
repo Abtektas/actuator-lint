@@ -83,6 +83,9 @@ static int loadParams(const char *path, FILE *out)
 	char line[256];
 	int num_set = 0;
 	bool first_unknown = true;
+	// integer parameters whose value in the file is not an integer; they are left at their default
+	char not_integer[64][64];
+	int num_not_integer = 0;
 
 	fputs("  \"unknown_parameters\": [", out);
 
@@ -103,7 +106,15 @@ static int loadParams(const char *path, FILE *out)
 		}
 
 		if (param_type(handle) == PARAM_TYPE_INT32) {
-			int32_t int_value = (int32_t)std::lround(value);
+			if (!std::isfinite(value) || value != std::floor(value) || std::fabs(value) > 2147483647.) {
+				if (num_not_integer < 64) {
+					snprintf(not_integer[num_not_integer++], sizeof(not_integer[0]), "%s", name);
+				}
+
+				continue;
+			}
+
+			int32_t int_value = (int32_t)value;
 			param_set_no_notification(handle, &int_value);
 
 		} else {
@@ -112,6 +123,12 @@ static int loadParams(const char *path, FILE *out)
 		}
 
 		num_set++;
+	}
+
+	fputs("],\n  \"not_integer_parameters\": [", out);
+
+	for (int i = 0; i < num_not_integer; i++) {
+		fprintf(out, "%s\"%s\"", i > 0 ? ", " : "", not_integer[i]);
 	}
 
 	fputs("],\n", out);

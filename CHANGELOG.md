@@ -26,6 +26,31 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   engine the report says that the flight phases are missing.
 - The golden reports of the seven standard VTOL and three tiltrotor scripts of
   PX4 v1.17.0 that have such motors now store them.
+- Rule CA005 (error): an axis the vehicle cannot be flown without is not
+  controlled by any matrix, for example roll and pitch of a multirotor whose
+  rotor positions are missing, or forward thrust of a standard VTOL. Such
+  configurations gave no finding before. New example
+  `examples/quad_no_positions.params`. Of PX4's own airframe scripts only
+  `1002_standard_vtol.hil` is affected, whose forward rotor is not counted.
+- Rule CA030 (error): a line of the parameter file could not be used, for
+  example a value with a decimal comma. Rule CA031 (warning): a `CA_*`
+  parameter does not exist in the PX4 version of the engine, for example a
+  misspelled name. Both were notes before, with exit code 0. New example
+  `examples/standard_vtol_typing_mistakes.params`.
+
+### Fixed
+
+- A parameter file that starts with a byte order mark lost its first line, so
+  that for example `CA_AIRFRAME` kept its default and the report was for a
+  multirotor.
+- A value written with digits that are not ASCII ended in a Python traceback.
+- Values that Python reads as a number but the engine does not, such as `1_0`,
+  were passed on and read as another number. Only plain decimal numbers are
+  accepted now.
+- An integer parameter with a fractional value was rounded, for example
+  `CA_AIRFRAME 2.5` to a tiltrotor. The engine now leaves such a parameter at
+  its default and CA030 reports it. This needs an engine built from this
+  version.
 
 ### Changed
 

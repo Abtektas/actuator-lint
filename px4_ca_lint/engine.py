@@ -203,6 +203,9 @@ def run_engine(engine: Path, params: dict[str, str]) -> dict:
         # not a tool failure: the rules report it as a finding
         code = 0
 
+    if code == 0 and result is None:
+        raise EngineError(f"the engine '{engine}' wrote no output that can be read; is it px4_ca_engine?")
+
     if code != 0 or result is None:
         detail = process.stderr.strip().splitlines()[-1:] or ["no error message"]
         raise EngineError(f"the engine failed (exit code {code}): {detail[0]}")
