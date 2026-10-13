@@ -32,6 +32,15 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   configurations gave no finding before. New example
   `examples/quad_no_positions.params`. Of PX4's own airframe scripts only
   `1002_standard_vtol.hil` is affected, whose forward rotor is not counted.
+- Rule CA006: an axis cannot be controlled independently of the others, for
+  example yaw of a quadrotor whose rotors all turn the same way. It is the test
+  PX4 `main` applies when it drops an axis (CA002), applied by the tool for PX4
+  versions that do not have it, which are v1.17.0 and release/1.18. Such
+  configurations gave no finding there. The result was compared with PX4
+  `main` for 4400 random configurations. New example
+  `examples/quad_same_spin.params`; `examples/hexa_rotor_count_4.params` gets
+  the finding for yaw as well. None of the airframe scripts of PX4 v1.17.0 is
+  affected; of release/1.18 only `5021_xplane_qtailsitter`, with two warnings.
 - Rule CA012 (error): the thrust of a rotor points down or backwards, for
   example a lift rotor with `CA_ROTORn_AZ 1`, a forward rotor with
   `CA_ROTORn_AX -1`, or a negative `CA_ROTORn_CT`. Such configurations gave no
@@ -46,6 +55,17 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   misspelled name. Both were notes before, with exit code 0. New example
   `examples/standard_vtol_typing_mistakes.params`.
 
+### Changed
+
+- CA002 is a warning, no longer an error, for an axis the vehicle type does not
+  need. PX4 `main` drops thrust_x and thrust_y of its own airframe
+  `5021_xplane_qtailsitter`, which gave two errors and exit code 1 for a
+  working airframe. For an axis the vehicle type needs, and for vehicle types
+  the tool knows nothing about, it stays an error.
+- The single engine location of earlier versions,
+  `~/.local/share/px4-ca-lint/px4_ca_engine`, keeps working and is tried before
+  the new directories. The message for a missing engine names the new location.
+
 ### Fixed
 
 - A parameter file that starts with a byte order mark lost its first line, so
@@ -59,12 +79,6 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   `CA_AIRFRAME 2.5` to a tiltrotor. The engine now leaves such a parameter at
   its default and CA030 reports it. This needs an engine built from this
   version.
-
-### Changed
-
-- The single engine location of earlier versions,
-  `~/.local/share/px4-ca-lint/px4_ca_engine`, keeps working and is tried before
-  the new directories. The message for a missing engine names the new location.
 
 ## 0.3.0 - 2026-10-09
 

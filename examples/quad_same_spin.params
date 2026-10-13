@@ -1,0 +1,18 @@
+# A quadrotor whose rotors all turn the same way: every CA_ROTORn_KM is
+# positive. The yaw row becomes a multiple of the thrust_z row.
+# Expected with PX4 v1.17.0: CA006 for yaw. PX4 versions that drop such an
+# axis themselves report CA002 and CA005 instead.
+CA_AIRFRAME 0
+CA_ROTOR_COUNT 4
+CA_ROTOR0_PX 0.15
+CA_ROTOR0_PY 0.15
+CA_ROTOR0_KM 0.05
+CA_ROTOR1_PX -0.15
+CA_ROTOR1_PY -0.15
+CA_ROTOR1_KM 0.05
+CA_ROTOR2_PX 0.15
+CA_ROTOR2_PY -0.15
+CA_ROTOR2_KM 0.05
+CA_ROTOR3_PX -0.15
+CA_ROTOR3_PY 0.15
+CA_ROTOR3_KM 0.05

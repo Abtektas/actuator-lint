@@ -149,6 +149,18 @@ class WithEngine(unittest.TestCase):
         self.assertEqual(self.found("examples/standard_vtol_pusher_offset.params"), ["CA010", "CA011"])
         self.assertEqual(self.found("examples/quad_wrong_spin.params"), ["CA020"])
 
+    def test_axis_that_is_not_independent(self):
+        code, stdout, _ = run("--engine", ENGINE, "--format", "json", "examples/quad_same_spin.params")
+        self.assertEqual(code, 1)
+        report = json.loads(stdout)
+        found = {(finding["rule"], finding["level"], finding["axis"]) for finding in report["findings"]}
+
+        if report["matrices"][0]["axes"][2]["status"] == "dropped by PX4":
+            self.assertEqual(found, {("CA002", "error", "yaw"), ("CA005", "error", "yaw")})
+
+        else:
+            self.assertEqual(found, {("CA006", "error", "yaw")})
+
     def test_thrust_in_the_wrong_direction(self):
         for example, axis, motor in (
             ("examples/quad_rotor_down.params", "thrust_z", "motor1"),
@@ -222,7 +234,7 @@ class WithEngine(unittest.TestCase):
         self.assertEqual(findings[1]["actuators"], ["motor0", "motor1"])
 
     def test_rotors_beyond_the_count(self):
-        # PX4 versions that report dropped axes add CA002 here, which is an error
+        # the remaining rotors cannot control yaw independently, which is an error (CA006, or CA002)
         example = "examples/hexa_rotor_count_4.params"
         code, stdout, _ = run("--engine", ENGINE, "--format", "json", "--fail-on", "never", example)
         self.assertEqual(code, 0)

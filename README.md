@@ -213,10 +213,11 @@ the matrices and are not part of it.
 | Rule | Level | Finds |
 |---|---|---|
 | [CA001](rules/CA001.md) | error | PX4 produced no usable effectiveness matrix |
-| [CA002](rules/CA002.md) | error | PX4 dropped a control axis |
+| [CA002](rules/CA002.md) | error or warning | PX4 dropped a control axis |
 | [CA003](rules/CA003.md) | error | a matrix contains NaN or infinity |
 | [CA004](rules/CA004.md) | warning | PX4 ignores an axis with weak authority |
 | [CA005](rules/CA005.md) | error | an axis the vehicle cannot be flown without is not controlled |
+| [CA006](rules/CA006.md) | error or warning | an axis cannot be controlled independently of the others |
 | [CA010](rules/CA010.md) | warning | thrust gain above the limit |
 | [CA011](rules/CA011.md) | warning | thrust command to an actuator that produces no thrust on that axis |
 | [CA012](rules/CA012.md) | error | the thrust of a rotor points down or backwards |
@@ -226,8 +227,10 @@ the matrices and are not part of it.
 | [CA030](rules/CA030.md) | error | a line of the parameter file could not be used |
 | [CA031](rules/CA031.md) | warning | a control allocation parameter does not exist in this PX4 version |
 
-CA002 needs a PX4 version newer than v1.17.0; with the prebuilt engines the
-report says that it was not checked.
+CA002 needs a PX4 version newer than release/1.18; with the prebuilt engines
+the report says that it was not checked, and CA006 applies the same test.
+CA002 and CA006 are errors for an axis the vehicle type needs and warnings for
+one it does not need.
 
 Options: `--ignore CA011,CA020` skips rules, `--max-thrust-gain` sets the limit
 of CA010, `--fail-on warning|error|never` chooses what gives exit code 1 (the

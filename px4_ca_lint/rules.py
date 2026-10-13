@@ -35,6 +35,13 @@ _NEEDED_AXES = {
     4: _HOVER_AXES,  # tailsitter VTOL
     8: _HOVER_AXES,  # multirotor with tilt
 }
+# CA006: the test of ControlAllocationPseudoInverse::dropDependentAxes of PX4 main (added after
+# release/1.18 was branched, PX4 pull request 28589): the order in which axes keep their row, the
+# smallest squared norm of a row that is looked at, and the smallest share of a unit row that has
+# to be independent of the rows before it
+_AXIS_PRIORITY = ("thrust_z", "roll", "pitch", "thrust_x", "thrust_y", "yaw")
+_FLT_EPSILON = 1.1920929e-07
+_MIN_AXIS_INDEPENDENCE = 1e-2
 # CA012: the CA_AIRFRAME values for which PX4 does not read the rotor axis CA_ROTORn_AX, _AY, _AZ
 # (fixed-wing: always forwards, multirotor with tilt: always upwards)
 _FIXED_AXIS_AIRFRAMES = (1, 8)
@@ -55,6 +62,7 @@ RULES = {
         Rule("CA003", ERROR, "a matrix contains NaN or infinity"),
         Rule("CA004", WARNING, "PX4 ignores an axis with weak authority"),
         Rule("CA005", ERROR, "an axis the vehicle cannot be flown without is not controlled"),
+        Rule("CA006", ERROR, "an axis cannot be controlled independently of the others"),
         Rule("CA010", WARNING, "thrust gain above the limit"),
         Rule("CA011", WARNING, "thrust command to an actuator that produces no thrust on that axis"),
         Rule("CA012", ERROR, "the thrust of a rotor points down or backwards"),
@@ -107,8 +115,15 @@ class Result:
         return sum(1 for finding in self.findings if finding.level == level)
 
 
-def _finding(rule_id: str, message: str, **where) -> Finding:
-    return Finding(rule=rule_id, level=RULES[rule_id].level, message=message, **where)
+def _finding(rule_id: str, message: str, level: str | None = None, **where) -> Finding:
+    return Finding(rule=rule_id, level=level or RULES[rule_id].level, message=message, **where)
+
+
+def _axis_level(airframe: int | None, axis: str) -> str:
+    """CA002 and CA006: an axis that is not independent is an error, unless the vehicle type is
+    known not to need the axis, for example thrust_x of a multirotor with canted rotors."""
+    needed = _NEEDED_AXES.get(airframe)
+    return WARNING if needed is not None and axis not in needed else ERROR
 
 
 def _labels(matrix: dict) -> list[str]:
@@ -124,6 +139,10 @@ def _has_non_finite(matrix: dict) -> bool:
 
 def _join(names: list[str]) -> str:
     return ", ".join(names)
+
+
+def _and(names: list[str]) -> str:
+    return " and ".join([", ".join(names[:-1]), names[-1]] if len(names) > 1 else names)
 
 
 def axis_status(matrix: dict, axis: str) -> str:
@@ -143,7 +162,7 @@ def axis_status(matrix: dict, axis: str) -> str:
     return "not controlled"
 
 
-def _check_dropped_axes(matrix: dict, result: Result) -> None:
+def _check_dropped_axes(matrix: dict, airframe: int | None, result: Result) -> None:
     dropped = matrix["dropped_axes_bitmask"]
 
     if dropped is None:
@@ -157,10 +176,98 @@ def _check_dropped_axes(matrix: dict, result: Result) -> None:
                     "CA002",
                     f"PX4 dropped {axis}: its effectiveness row depends on axes with a higher "
                     "priority, so it cannot be controlled independently",
+                    level=_axis_level(airframe, axis),
                     matrix=matrix["index"],
                     axis=axis,
                 )
             )
+
+
+def _dot(first: list[float], second: list[float]) -> float:
+    return sum(x * y for x, y in zip(first, second))
+
+
+def _combination(row: list[float], others: list[list[float]]) -> list[float]:
+    """The factors of the combination of the other rows that is closest to the row (least squares)."""
+    size = len(others)
+    # normal equations, solved by Gaussian elimination with pivoting; the other rows are independent
+    system = [[_dot(others[i], others[j]) for j in range(size)] + [_dot(others[i], row)] for i in range(size)]
+
+    for column in range(size):
+        pivot = max(range(column, size), key=lambda line: abs(system[line][column]))
+        system[column], system[pivot] = system[pivot], system[column]
+
+        for line in range(size):
+            if line != column:
+                factor = system[line][column] / system[column][column]
+                system[line] = [value - factor * other for value, other in zip(system[line], system[column])]
+
+    return [system[line][size] / system[line][line] for line in range(size)]
+
+
+def dependent_axes(matrix: dict) -> list[tuple[str, list[str]]]:
+    """The axes PX4 main would drop from a matrix, each with the axes its row is a combination of.
+
+    The same test as ControlAllocationPseudoInverse::dropDependentAxes: in the order of
+    _AXIS_PRIORITY a row is kept when enough of it is independent of the rows kept before it.
+    """
+    basis: list[list[float]] = []
+    kept: list[str] = []
+    dependent = []
+
+    for axis in _AXIS_PRIORITY:
+        row = matrix["effectiveness"][axis]
+        norm_squared = _dot(row, row)
+
+        if norm_squared < _FLT_EPSILON:
+            continue
+
+        unit = [value / norm_squared**0.5 for value in row]
+        shares = [_dot(unit, vector) for vector in basis]
+        independence = 1 - sum(share * share for share in shares)
+
+        if independence < _MIN_AXIS_INDEPENDENCE:
+            factors = _combination(row, [matrix["effectiveness"][other] for other in kept])
+            # the rows that make up a noticeable part of this one
+            parts = [
+                other
+                for other, factor in zip(kept, factors)
+                if _dot(matrix["effectiveness"][other], matrix["effectiveness"][other]) * factor * factor
+                > 0.01 * norm_squared
+            ]
+            dependent.append((axis, parts or list(kept)))
+            continue
+
+        rest = [
+            value - sum(share * vector[i] for share, vector in zip(shares, basis)) for i, value in enumerate(unit)
+        ]
+        basis.append([value / independence**0.5 for value in rest])
+        kept.append(axis)
+
+    return dependent
+
+
+def _check_independent_axes(matrix: dict, engine_result: dict, result: Result) -> None:
+    # where PX4 drops such axes itself, CA002 reports them
+    if matrix["dropped_axes_bitmask"] is not None:
+        return
+
+    px4_version = engine_result.get("px4_version")
+    version = f"PX4 {px4_version}" if px4_version else "This PX4 version"
+
+    for axis, parts in dependent_axes(matrix):
+        result.findings.append(
+            _finding(
+                "CA006",
+                f"{axis} cannot be controlled independently: its effectiveness row is a combination of "
+                f"the {'row' if len(parts) == 1 else 'rows'} of {_and(parts)}, so no actuator command "
+                f"changes {axis} without changing {'it' if len(parts) == 1 else 'them'}. {version} "
+                "computes a mix for it all the same; PX4 main drops such an axis (CA002)",
+                level=_axis_level(engine_result.get("ca_airframe"), axis),
+                matrix=matrix["index"],
+                axis=axis,
+            )
+        )
 
 
 def _check_weak_axes(matrix: dict, result: Result) -> None:
@@ -494,8 +601,9 @@ def check(
             )
             continue
 
-        _check_dropped_axes(matrix, result)
+        _check_dropped_axes(matrix, engine_result.get("ca_airframe"), result)
         _check_weak_axes(matrix, result)
+        _check_independent_axes(matrix, engine_result, result)
         _check_thrust_gain(matrix, options, result)
         _check_cross_command(matrix, options, result)
         _check_thrust_direction(matrix, engine_result.get("ca_airframe"), result)

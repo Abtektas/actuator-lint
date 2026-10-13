@@ -64,3 +64,13 @@ have thrust gains of 1.66, below the default limit of 2.0. The same two
 airframes, `8011_gz_omnicopter` and `10019_gazebo-classic_omnicopter`, are why
 rule CA012 leaves a multirotor alone whose rotors do not all act along the
 vertical: two of their eight rotors point backwards on purpose.
+
+## Newer PX4 versions
+
+There are no stored reports for PX4 versions after v1.17.0 yet. One script
+that is new in release/1.18 gets findings there, checked on 2026-10-13 with an
+engine built against 492d132563:
+
+| Script | Rule | What it means |
+|---|---|---|
+| `init.d-posix/airframes/5021_xplane_qtailsitter` | CA006, twice (warnings) | The four rotors are canted (`CA_ROTORn_AX`, `_AY`), so they produce a little thrust_x and thrust_y, whose rows are multiples of the pitch and roll rows. A quad tailsitter does not need these axes. PX4 `main` drops both for this script, which the tool reports as CA002 warnings with an engine built against it. |

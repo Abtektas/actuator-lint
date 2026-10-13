@@ -52,8 +52,9 @@ version.
 | `v1.18.0-beta1-934-g8c243a2cd6` (main) | `8c243a2cd6` | builds, unit and end-to-end tests pass; no golden reports, no cross-check | 2026-10-08 |
 
 Both builds give identical matrices for the files in `examples/`, except
-`hexa_rotor_count_4.params`: the newer PX4 drops the yaw axis there and reports
-it, see [CA021](../rules/CA021.md).
+`hexa_rotor_count_4.params` and `quad_same_spin.params`: the newer PX4 drops
+the yaw axis there and reports it ([CA002](../rules/CA002.md)). For v1.17.0
+the tool finds the same axis itself ([CA006](../rules/CA006.md)).
 
 Known differences between PX4 versions that the engine handles:
 

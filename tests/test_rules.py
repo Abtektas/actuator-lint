@@ -82,6 +82,77 @@ class Rules(unittest.TestCase):
         self.assertEqual(rules(result), ["CA002"])
         self.assertEqual(result.findings[0].axis, "yaw")
 
+    def test_ca002_level_follows_what_the_vehicle_needs(self):
+        # bits 3 and 5 are thrust_x and thrust_z
+        dropped = dict(healthy(), dropped_axes_bitmask=(1 << 3) | (1 << 5))
+        ignore = Options(ignore=frozenset({"CA005"}))
+        tailsitter = check(engine_result(dropped, ca_airframe=4), ignore)
+        levels = [(item.axis, item.level) for item in tailsitter.findings]
+        self.assertEqual(levels, [("thrust_x", "warning"), ("thrust_z", "error")])
+        # a standard VTOL needs forward thrust
+        levels = [item.level for item in check(engine_result(dropped, ca_airframe=2), ignore).findings]
+        self.assertEqual(levels, ["error", "error"])
+        # nothing is known about what other vehicle types need
+        for airframe in (7, None):
+            levels = [item.level for item in check(engine_result(dropped, ca_airframe=airframe), ignore).findings]
+            self.assertEqual(levels, ["error", "error"], airframe)
+
+    def test_ca006_yaw_that_depends_on_thrust(self):
+        same_spin = matrix(
+            {"roll": [-1, 1, 1, -1], "pitch": [1, -1, 1, -1], "yaw": [0.3] * 4, "thrust_z": [-6.5] * 4},
+            [{"roll": 0.7, "pitch": 0.7, "yaw": 1, "thrust_z": -1}] * 4,
+            dropped_axes_bitmask=None,
+        )
+        result = check(engine_result(same_spin, ca_airframe=0, px4_version="v1.17.0"))
+        self.assertEqual(rules(result), ["CA006"])
+        self.assertNotIn("CA006", result.not_checked)
+        finding = result.findings[0]
+        self.assertEqual((finding.level, finding.matrix, finding.axis), ("error", 0, "yaw"))
+        self.assertIn("yaw cannot be controlled independently", finding.message)
+        self.assertIn("a combination of the row of thrust_z, so no actuator command changes yaw", finding.message)
+        self.assertIn("PX4 v1.17.0 computes a mix for it all the same", finding.message)
+        # where PX4 drops such axes itself, CA002 is the finding
+        reported = dict(same_spin, dropped_axes_bitmask=0)
+        self.assertEqual(rules(check(engine_result(reported, ca_airframe=0))), [])
+
+    def test_ca006_names_the_rows_an_axis_depends_on(self):
+        from px4_ca_lint.rules import dependent_axes
+
+        # yaw is roll minus pitch; thrust_x is a little of pitch, as with canted rotors
+        canted = matrix(
+            {
+                "roll": [-1, 1, 1, -1],
+                "pitch": [1, -1, 1, -1],
+                "yaw": [-2, 2, 0, 0],
+                "thrust_x": [0.2, -0.2, 0.2, -0.2],
+                "thrust_z": [-6.5] * 4,
+            },
+            [{}] * 4,
+            dropped_axes_bitmask=None,
+        )
+        self.assertEqual(dependent_axes(canted), [("thrust_x", ["pitch"]), ("yaw", ["roll", "pitch"])])
+        ignore = Options(ignore=frozenset({"CA020"}))
+        findings = check(engine_result(canted, ca_airframe=4, px4_version="v1.17.0"), ignore).findings
+        self.assertEqual([(item.rule, item.axis, item.level) for item in findings],
+                         [("CA006", "thrust_x", "warning"), ("CA006", "yaw", "error")])
+        self.assertIn("the rows of roll and pitch, so no actuator command changes yaw without changing them",
+                      findings[1].message)
+
+    def test_ca006_uses_the_limits_of_px4(self):
+        from px4_ca_lint.rules import dependent_axes
+
+        def yaw_with(part):
+            # a yaw row with the given part that is independent of the thrust_z row
+            return matrix({"yaw": [1 + part, 1 - part], "thrust_z": [-1, -1]}, [{}] * 2)
+
+        # PX4 keeps a row when at least 0.01 of the squared unit row is independent
+        self.assertEqual(dependent_axes(yaw_with(0.11)), [])
+        self.assertEqual(dependent_axes(yaw_with(0.09)), [("yaw", ["thrust_z"])])
+        # rows without an entry are not looked at, and the order of priority decides which row goes
+        self.assertEqual(dependent_axes(matrix({"roll": [1, 1], "thrust_z": [0, 0]}, [{}] * 2)), [])
+        tied = matrix({"roll": [1, 1], "pitch": [2, 2]}, [{}] * 2)
+        self.assertEqual(dependent_axes(tied), [("pitch", ["roll"])])
+
     def test_ca002_not_checked_without_px4_support(self):
         result = check(engine_result(matrix({}, [{}], dropped_axes_bitmask=None)))
         self.assertEqual(result.findings, [])
