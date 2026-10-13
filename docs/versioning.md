@@ -12,6 +12,17 @@ A release is made by a tag `vX.Y.Z`. The release workflow runs every test,
 builds the engines and creates a draft GitHub Release, which is published by
 hand. Each release names the PX4 version of its prebuilt engines.
 
+Publishing a release starts two more workflows. "action check" uses the
+[GitHub Action](github-action.md) with the new release; before the tag, the
+default of its `version` input in `action.yml` is set to the new version.
+"pypi" uploads the Python package of the release to the Python Package Index,
+but only when the repository variable `PYPI_PUBLISH` is `true`. An upload
+cannot be undone and a version number cannot be used twice there. It needs,
+once, an account on pypi.org that adds this repository as a trusted publisher
+of the project `px4-ca-lint` (owner `Abtektas`, repository `px4-ca-lint`,
+workflow `pypi.yml`, environment `pypi`); no password or token is stored in
+the repository.
+
 | Tool | Date | PX4 of the prebuilt engines | `engine_schema` |
 |---|---|---|---|
 | 0.1.0 | 2026-10-02 | v1.17.0 | 1 |

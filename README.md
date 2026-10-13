@@ -44,6 +44,11 @@ show it for known mistakes without installing anything.
 - This project is not affiliated with or endorsed by the PX4 project or the
   Dronecode Foundation.
 
+These terms are part of the program. Every report ends with them in every
+format, and no option leaves them out. `px4-ca-lint --version` prints them in
+short, `px4-ca-lint license` prints the license, the engine prints them with
+its usage, and every engine package contains the license texts.
+
 ## Example
 
 `examples/standard_vtol_pusher_offset.params` is PX4's SIH standard VTOL with
@@ -122,6 +127,9 @@ release 0.4.0.
    px4-ca-lint --version
    px4-ca-lint your.params
    ```
+
+To check parameter files in a GitHub workflow, use the
+[GitHub Action](docs/github-action.md) instead of these steps.
 
 Requirements of the prebuilt engines:
 

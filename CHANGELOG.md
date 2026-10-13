@@ -18,6 +18,20 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
 - A picture of the tool in a terminal at the top of the README. It is written
   by `tools/terminal_image.py` from what the tool prints, and a test fails
   when it is out of date.
+- `px4-ca-lint license` prints the license and the notices, which are now
+  part of the Python package. The engine prints its notice with its usage,
+  and every source file names its license.
+- A [GitHub Action](docs/github-action.md): `uses: Abtektas/px4-ca-lint@...`
+  installs a release on the runner, checks the files you name and adds the
+  reports to the job summary.
+- Package metadata for the Python Package Index and a workflow that uploads
+  a published release there. It does nothing until the repository variable
+  `PYPI_PUBLISH` is set; see [docs/versioning.md](docs/versioning.md).
+
+### Changed
+
+- `px4-ca-lint --version` prints the copyright, the license and the terms in
+  short after the version line. The first line is unchanged.
 
 ## 0.4.0 - 2026-10-13
 
