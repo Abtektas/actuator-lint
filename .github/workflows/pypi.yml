@@ -1,0 +1,48 @@
+name: pypi
+
+# Uploads the Python package of a published release to the Python Package
+# Index, with the files of that release. An upload cannot be undone, so the
+# workflow does nothing until the repository variable PYPI_PUBLISH is set to
+# "true"; docs/versioning.md says what has to be set up on pypi.org before.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release to upload, without the leading v
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    name: Upload to PyPI
+    if: vars.PYPI_PUBLISH == 'true'
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi
+      url: https://pypi.org/project/px4-ca-lint/
+    permissions:
+      contents: read
+      # the package index trusts this workflow by its identity; there is no stored password or token
+      id-token: write
+    env:
+      VERSION: ${{ inputs.version || github.event.release.tag_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Download the Python package of the release
+        run: |
+          VERSION="${VERSION#v}"
+          mkdir dist
+          gh release download "v${VERSION}" -R "${GITHUB_REPOSITORY}" -D . \
+            -p "px4_ca_lint-${VERSION}-py3-none-any.whl" -p "px4_ca_lint-${VERSION}.tar.gz" -p SHA256SUMS
+          sha256sum --ignore-missing -c SHA256SUMS
+          # the files were built by the release workflow of this repository
+          gh attestation verify "px4_ca_lint-${VERSION}-py3-none-any.whl" -R "${GITHUB_REPOSITORY}"
+          gh attestation verify "px4_ca_lint-${VERSION}.tar.gz" -R "${GITHUB_REPOSITORY}"
+          mv "px4_ca_lint-${VERSION}-py3-none-any.whl" "px4_ca_lint-${VERSION}.tar.gz" dist/
+          ls -l dist
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2

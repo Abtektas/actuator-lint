@@ -6,12 +6,35 @@ build-backend = "hatchling.build"
 name = "px4-ca-lint"
 dynamic = ["version"]
 description = "Offline review aid for PX4 control allocation parameters"
-readme = "README.md"
+# the README has links inside the repository, which the package index does not resolve
+readme = "docs/pypi.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 authors = [{ name = "A. Burak Tektas" }]
+keywords = ["px4", "control allocation", "uav", "drone", "vtol", "lint"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Quality Assurance",
+]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Abtektas/px4-ca-lint"
+Documentation = "https://github.com/Abtektas/px4-ca-lint/blob/main/docs/getting-started.md"
+Changelog = "https://github.com/Abtektas/px4-ca-lint/blob/main/CHANGELOG.md"
+Issues = "https://github.com/Abtektas/px4-ca-lint/issues"
 
 [project.scripts]
 px4-ca-lint = "px4_ca_lint.cli:main"
