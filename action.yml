@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: BSD-3-Clause
+name: px4-ca-lint
+description: >-
+  Check PX4 control allocation (CA_*) parameter files with px4-ca-lint.
+  A review aid, not an airworthiness approval; no warranty and no liability.
+author: A. Burak Tektas
+branding:
+  icon: check-square
+  color: blue
+
+inputs:
+  files:
+    description: >-
+      Parameter files to check, one per line. A line can be a pattern such as
+      config/*.params. A line that matches no file is an error.
+    required: true
+  fail-on:
+    description: Lowest finding level that fails the step (warning, error or never).
+    default: error
+  arguments:
+    description: Further px4-ca-lint options for every file, for example --ignore CA011.
+    default: ""
+  summary:
+    description: Whether the reports are added to the job summary (true or false).
+    default: "true"
+  version:
+    description: Release of px4-ca-lint to install, without the leading v.
+    default: "0.4.0"
+
+outputs:
+  files:
+    description: Number of files checked.
+    value: ${{ steps.run.outputs.files }}
+  failed:
+    description: Number of files with findings at or above fail-on, or that could not be read.
+    value: ${{ steps.run.outputs.failed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install px4-ca-lint
+      shell: bash
+      env:
+        PX4_CA_LINT_VERSION: ${{ inputs.version }}
+        GH_TOKEN: ${{ github.token }}
+      run: bash "$GITHUB_ACTION_PATH/action/install.sh"
+    - name: Check the parameter files
+      id: run
+      shell: bash
+      env:
+        INPUT_FILES: ${{ inputs.files }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_ARGUMENTS: ${{ inputs.arguments }}
+        INPUT_SUMMARY: ${{ inputs.summary }}
+      run: bash "$GITHUB_ACTION_PATH/action/run.sh"

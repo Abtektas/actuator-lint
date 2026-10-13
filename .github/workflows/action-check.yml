@@ -1,0 +1,69 @@
+name: action check
+
+# Uses the GitHub Action of this repository the way another repository would:
+# it installs a published release and checks files of examples/.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - action.yml
+      - action/**
+      - .github/workflows/action-check.yml
+  pull_request:
+    paths:
+      - action.yml
+      - action/**
+      - .github/workflows/action-check.yml
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  action:
+    name: ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-26]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Files without error findings
+        id: good
+        uses: ./
+        with:
+          files: |
+            examples/fixed_wing.params
+            examples/tilt*.params
+      - name: A file with an error finding
+        id: bad
+        continue-on-error: true
+        uses: ./
+        with:
+          files: examples/quad_rotor_down.params
+          summary: "false"
+      - name: The same file, findings allowed
+        id: allowed
+        uses: ./
+        with:
+          files: examples/quad_rotor_down.params
+          fail-on: never
+          summary: "false"
+      - name: Check the results
+        env:
+          GOOD_FILES: ${{ steps.good.outputs.files }}
+          GOOD_FAILED: ${{ steps.good.outputs.failed }}
+          BAD_OUTCOME: ${{ steps.bad.outcome }}
+          BAD_FAILED: ${{ steps.bad.outputs.failed }}
+          ALLOWED_FAILED: ${{ steps.allowed.outputs.failed }}
+        run: |
+          echo "good: $GOOD_FILES files, $GOOD_FAILED failed; bad: $BAD_OUTCOME, $BAD_FAILED failed; allowed: $ALLOWED_FAILED failed"
+          test "$GOOD_FILES" = 3
+          test "$GOOD_FAILED" = 0
+          test "$BAD_OUTCOME" = failure
+          test "$BAD_FAILED" = 1
+          test "$ALLOWED_FAILED" = 0
