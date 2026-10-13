@@ -103,6 +103,16 @@ motors get 0.25 and -0.25 to cancel the pitch torque of the pusher, and the
 pusher gets 4.0, so its output is at its limit at a thrust_x setpoint of 0.25.
 Both are findings below.
 
+PX4 computes the mix in single precision, and the engine runs that code on
+your computer. For most configurations the values are the same on every
+computer up to the last digit. For a matrix that is hard to invert, which is
+usually one with a mistake in it, they can differ in the second decimal
+between CPU types: in the mix of
+[`quad_wrong_spin`](example-reports/quad_wrong_spin.md) the thrust_z column of
+motor0 is 0.073 with the arm64 engines and 0.009 with the x86_64 engine, where
+the exact value is 0. A flight controller may not compute exactly the printed
+value either.
+
 ### Axes
 
 ```

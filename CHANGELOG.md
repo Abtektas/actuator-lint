@@ -13,6 +13,8 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   [docs/example-reports](docs/example-reports/README.md). The example reports
   are written by `tools/example_reports.py`, and a test fails when one of them
   is out of date.
+  [Reading a report](docs/reading-a-report.md#mix) says how far mix values can
+  differ between CPU types.
 
 ## 0.4.0 - 2026-10-13
 

@@ -25,6 +25,14 @@ from px4_ca_lint.cli import main  # noqa: E402
 PX4_VERSION = "v1.17.0"
 OUTPUT = ROOT / "docs" / "example-reports"
 
+# How far a number may be from the stored one. The engines of different platforms do not round
+# every value alike, so the last digit may differ.
+TOLERANCE = 0.0011
+# PX4 computes the mix in single precision, and its pseudo-inverse amplifies the rounding of a
+# matrix that is hard to invert. In the thrust_z column of this example the exact value is 0;
+# the arm64 engines print 0.073 and the x86_64 engine 0.009. Twice the larger one is accepted.
+TOLERANCES = {"quad_wrong_spin.md": 0.15}
+
 # what each example shows, for the index
 EXAMPLES = {
     "quad_qgc_export": "A quadrotor X, as a parameter file saved by QGroundControl",
@@ -62,12 +70,8 @@ def normalised(text: str) -> str:
     return re.sub(r"/blob/[^/]+/rules/", "/blob/REF/rules/", text)
 
 
-def same(first: str, second: str) -> bool:
-    """Whether two reports say the same.
-
-    The last digit of a number may differ: the engines of different platforms do not round every
-    value alike.
-    """
+def same(first: str, second: str, tolerance: float = TOLERANCE) -> bool:
+    """Whether two reports say the same: the same text, and numbers within the tolerance."""
     number = re.compile(r"(-?\d+\.\d+)")
     one, two = number.split(normalised(first)), number.split(normalised(second))
 
@@ -76,7 +80,7 @@ def same(first: str, second: str) -> bool:
 
     for index, (left, right) in enumerate(zip(one, two)):
         # the odd items are the numbers
-        if index % 2 and abs(float(left) - float(right)) > 0.0011:
+        if index % 2 and abs(float(left) - float(right)) > tolerance:
             return False
 
         if not index % 2 and left != right:
@@ -119,7 +123,8 @@ def build() -> dict[str, str]:
             "The report of every file in [`examples/`](../../examples), as the tool prints it with",
             f"`--format markdown` and the engine for PX4 {PX4_VERSION} on macOS arm64. They are written by",
             "`tools/example_reports.py`, and the tests fail when one of them is out of date. On another",
-            "platform the last digit of a value can differ.",
+            "platform the last digit of a value can differ, and the mix of `quad_wrong_spin` differs",
+            "more: see [Reading a report](../reading-a-report.md#mix).",
             "",
             "[Reading a report](../reading-a-report.md) explains the parts of a report.",
             "",
@@ -146,8 +151,9 @@ def out_of_date() -> list[str]:
 
     for name in sorted(stored & set(files)):
         old, new = (OUTPUT / name).read_text(encoding="utf-8"), files[name]
+        tolerance = TOLERANCES.get(name, TOLERANCE)
 
-        if same(old, new):
+        if same(old, new, tolerance):
             continue
 
         old_lines, new_lines = old.splitlines(), new.splitlines()
@@ -155,7 +161,7 @@ def out_of_date() -> list[str]:
         if len(old_lines) != len(new_lines):
             problems.append(f"{name}: {len(old_lines)} lines stored, {len(new_lines)} printed")
 
-        differing = [(a, b) for a, b in zip(old_lines, new_lines) if not same(a, b)]
+        differing = [(a, b) for a, b in zip(old_lines, new_lines) if not same(a, b, tolerance)]
         problems += [f"{name}: stored {a!r}, printed {b!r}" for a, b in differing[:6]]
 
     return problems

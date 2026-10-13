@@ -4,8 +4,6 @@ Needs an engine built against the PX4 version of those reports; skipped with ano
 """
 
 import importlib.util
-import platform
-import sys
 import unittest
 from pathlib import Path
 
@@ -25,29 +23,40 @@ except EngineError:
 @unittest.skipUnless(PX4_VERSION == example_reports.PX4_VERSION, "needs an engine built against PX4 v1.17.0")
 class ExampleReports(unittest.TestCase):
     def test_stored_reports_are_up_to_date(self):
-        problems = example_reports.out_of_date()
+        self.assertEqual(example_reports.out_of_date(), [], "run tools/example_reports.py")
 
-        # The stored reports were made on arm64, and the engines for macOS and Linux arm64 print
-        # them alike. The x86_64 engine prints the mix of examples/quad_wrong_spin.params with
-        # larger differences. Until it is known how large, the differences are printed there
-        # and do not fail the run.
-        if problems and platform.machine() not in ("arm64", "aarch64"):
-            print("\nexample reports differ on", platform.machine(), *problems, sep="\n  ", file=sys.stderr)
-            self.skipTest(f"{len(problems)} difference(s) on {platform.machine()}, printed above")
-
-        self.assertEqual(problems, [], "run tools/example_reports.py")
-
-    def test_differences_fail_on_arm64_only(self):
+    def test_a_difference_names_the_file_and_the_lines(self):
         from unittest import mock
 
-        problems = ["quad_wrong_spin.md: stored 'a', printed 'b'"]
+        files = example_reports.build()
+        files["quad_qgc_export.md"] = files["quad_qgc_export.md"].replace("4 motors", "5 motors")
 
-        with mock.patch.object(example_reports, "out_of_date", return_value=problems):
-            with mock.patch("platform.machine", return_value="aarch64"):
-                self.assertRaises(AssertionError, self.test_stored_reports_are_up_to_date)
+        with mock.patch.object(example_reports, "build", return_value=files):
+            problems = example_reports.out_of_date()
 
-            with mock.patch("platform.machine", return_value="x86_64"), mock.patch("sys.stderr"):
-                self.assertRaises(unittest.SkipTest, self.test_stored_reports_are_up_to_date)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("quad_qgc_export.md: stored", problems[0])
+        self.assertIn("5 motors", problems[0])
+
+    def test_the_mix_of_the_wrong_spin_example_may_differ_more(self):
+        from unittest import mock
+
+        name = "quad_wrong_spin.md"
+        files = example_reports.build()
+        stored = (example_reports.OUTPUT / name).read_text(encoding="utf-8")
+        # what the x86_64 engine prints
+        x86_64 = stored.replace("| 0.073 |", "| 0.009 |").replace("| -1.927 |", "| -1.991 |")
+        self.assertNotEqual(x86_64, stored)
+
+        with mock.patch.object(example_reports, "build", return_value={**files, name: x86_64}):
+            self.assertEqual(example_reports.out_of_date(), [])
+
+        # the same difference in another example is one, and so is a larger one here
+        self.assertFalse(example_reports.same(stored, x86_64))
+        larger = stored.replace("| 0.073 |", "| 0.300 |")
+
+        with mock.patch.object(example_reports, "build", return_value={**files, name: larger}):
+            self.assertEqual(len(example_reports.out_of_date()), 2)
 
     def test_version_strings_do_not_count(self):
         link = "[CA010](https://github.com/Abtektas/px4-ca-lint/blob/{}/rules/CA010.md)"
