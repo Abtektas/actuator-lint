@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 781 678" width="781" height="678" role="img" aria-labelledby="title description">
+<title id="title">px4-ca-lint in a terminal</title>
+<desc id="description">The command px4-ca-lint examples/standard_vtol_pusher_offset.params and a shortened copy of the report it prints: the header, the mix of the first matrix, the findings (0 error(s), 2 warning(s), exit code 0) and the disclaimer.</desc>
+<style>
+text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; white-space: pre; }
+.plain { fill: #c9d1d9; }
+.title { fill: #f0f6fc; font-weight: bold; }
+.dim { fill: #8b949e; }
+.omitted { fill: #8b949e; font-style: italic; }
+.prompt { fill: #3fb950; }
+.warning { fill: #d29922; font-weight: bold; }
+.error { fill: #f85149; font-weight: bold; }
+/* Without animation everything is visible: the picture is complete in a viewer that does not animate. */
+@media (prefers-reduced-motion: no-preference) {
+  .cover { animation: type 1.2s steps(55, end) 0.4s backwards; }
+  .part { animation: appear 0.25s ease-out backwards; }
+  .part1 { animation-delay: 1.9s; }
+  .part2 { animation-delay: 2.4s; }
+  .part3 { animation-delay: 3.0s; }
+  .part4 { animation-delay: 3.6s; }
+}
+@keyframes type { from { transform: translateX(0); } to { transform: translateX(433.0px); } }
+@keyframes appear { from { opacity: 0; } to { opacity: 1; } }
+</style>
+<rect width="781" height="678" rx="8" fill="#0d1117"/>
+<path d="M0 34V8a8 8 0 0 1 8-8H773a8 8 0 0 1 8 8V34z" fill="#161b22"/>
+<circle cx="20" cy="17" r="6" fill="#f85149"/>
+<circle cx="40" cy="17" r="6" fill="#d29922"/>
+<circle cx="60" cy="17" r="6" fill="#3fb950"/>
+<text x="16" y="63" font-size="13" xml:space="preserve" textLength="444.6" lengthAdjust="spacing"><tspan class="prompt">$ </tspan><tspan class="title">px4-ca-lint examples/standard_vtol_pusher_offset.params</tspan></text>
+<rect class="cover" x="31.6" y="48" width="433.0" height="18" fill="#0d1117" style="transform: translateX(433.0px)"/>
+<g class="part part1">
+<text x="16" y="81" font-size="13" xml:space="preserve" textLength="132.6" lengthAdjust="spacing"><tspan class="plain">px4-ca-lint 0.4.0</tspan></text>
+<text x="16" y="117" font-size="13" xml:space="preserve" textLength="655.2" lengthAdjust="spacing"><tspan class="plain">Input:     examples/standard_vtol_pusher_offset.params (plain format, 26 parameters)</tspan></text>
+<text x="16" y="135" font-size="13" xml:space="preserve" textLength="241.8" lengthAdjust="spacing"><tspan class="plain">PX4:       v1.17.0 (d6f12ad1c4)</tspan></text>
+<text x="16" y="153" font-size="13" xml:space="preserve" textLength="312.0" lengthAdjust="spacing"><tspan class="plain">Airframe:  CA_AIRFRAME 2 (Standard VTOL)</tspan></text>
+<text x="16" y="171" font-size="13" xml:space="preserve" textLength="226.2" lengthAdjust="spacing"><tspan class="plain">Actuators: 5 motors, 3 servos</tspan></text>
+</g>
+<g class="part part2">
+<text x="16" y="207" font-size="13" xml:space="preserve" textLength="475.8" lengthAdjust="spacing"><tspan class="title">Matrix 0 (sequential_desaturation, roll/pitch/yaw normalised)</tspan></text>
+<text x="16" y="225" font-size="13" xml:space="preserve" textLength="179.4" lengthAdjust="spacing"><tspan class="omitted">  ... 10 lines left out</tspan></text>
+<text x="16" y="243" font-size="13" xml:space="preserve" textLength="444.6" lengthAdjust="spacing"><tspan class="plain">  Mix: actuator command per unit of setpoint on each axis</tspan></text>
+<text x="16" y="261" font-size="13" xml:space="preserve" textLength="546.0" lengthAdjust="spacing"><tspan class="plain">  actuator      roll     pitch       yaw  thrust_x  thrust_y  thrust_z</tspan></text>
+<text x="16" y="279" font-size="13" xml:space="preserve" textLength="546.0" lengthAdjust="spacing"><tspan class="plain">  motor0      -0.707     0.707     1.000     0.250     0.000    -1.000</tspan></text>
+<text x="16" y="297" font-size="13" xml:space="preserve" textLength="546.0" lengthAdjust="spacing"><tspan class="plain">  motor1       0.707    -0.707     1.000    -0.250     0.000    -1.000</tspan></text>
+<text x="16" y="315" font-size="13" xml:space="preserve" textLength="546.0" lengthAdjust="spacing"><tspan class="plain">  motor2       0.707     0.707    -1.000     0.250     0.000    -1.000</tspan></text>
+<text x="16" y="333" font-size="13" xml:space="preserve" textLength="546.0" lengthAdjust="spacing"><tspan class="plain">  motor3      -0.707    -0.707    -1.000    -0.250     0.000    -1.000</tspan></text>
+<text x="16" y="351" font-size="13" xml:space="preserve" textLength="546.0" lengthAdjust="spacing"><tspan class="plain">  motor4       0.000     0.000     0.000     4.000     0.000     0.000</tspan></text>
+<text x="16" y="369" font-size="13" xml:space="preserve" textLength="179.4" lengthAdjust="spacing"><tspan class="omitted">  ... 47 lines left out</tspan></text>
+</g>
+<g class="part part3">
+<text x="16" y="387" font-size="13" xml:space="preserve" textLength="62.4" lengthAdjust="spacing"><tspan class="title">Findings</tspan></text>
+<text x="16" y="405" font-size="13" xml:space="preserve" textLength="741.0" lengthAdjust="spacing"><tspan class="plain">  </tspan><tspan class="warning">warning</tspan><tspan class="plain"> CA010 matrix 0: motor4: thrust_x gain up to 4.00 (limit 2); the output saturates at a</tspan></text>
+<text x="16" y="423" font-size="13" xml:space="preserve" textLength="226.2" lengthAdjust="spacing"><tspan class="plain">    thrust_x setpoint of 0.25</tspan></text>
+<text x="16" y="441" font-size="13" xml:space="preserve" textLength="265.2" lengthAdjust="spacing"><tspan class="plain">      thrust gain above the limit:</tspan></text>
+<text x="16" y="459" font-size="13" xml:space="preserve" textLength="577.2" lengthAdjust="spacing"><tspan class="dim">        https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA010.md</tspan></text>
+<text x="16" y="477" font-size="13" xml:space="preserve" textLength="717.6" lengthAdjust="spacing"><tspan class="plain">  </tspan><tspan class="warning">warning</tspan><tspan class="plain"> CA011 matrix 0: motor0, motor1, motor2, motor3: commanded by the thrust_x setpoint</tspan></text>
+<text x="16" y="495" font-size="13" xml:space="preserve" textLength="616.2" lengthAdjust="spacing"><tspan class="plain">    without producing thrust_x thrust; a thrust_x setpoint changes their output</tspan></text>
+<text x="16" y="513" font-size="13" xml:space="preserve" textLength="569.4" lengthAdjust="spacing"><tspan class="plain">      thrust command to an actuator that produces no thrust on that axis:</tspan></text>
+<text x="16" y="531" font-size="13" xml:space="preserve" textLength="577.2" lengthAdjust="spacing"><tspan class="dim">        https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA011.md</tspan></text>
+<text x="16" y="549" font-size="13" xml:space="preserve" textLength="546.0" lengthAdjust="spacing"><tspan class="plain">  CA002 was not checked: this PX4 version does not report dropped axes</tspan></text>
+<text x="16" y="567" font-size="13" xml:space="preserve" textLength="202.8" lengthAdjust="spacing"><tspan class="plain">  0 error(s), 2 warning(s)</tspan></text>
+</g>
+<g class="part part4">
+<text x="16" y="585" font-size="13" xml:space="preserve" textLength="171.6" lengthAdjust="spacing"><tspan class="omitted">  ... 5 lines left out</tspan></text>
+<text x="16" y="621" font-size="13" xml:space="preserve" textLength="694.2" lengthAdjust="spacing"><tspan class="dim">This report is a review aid, not an airworthiness approval. No findings does not mean the</tspan></text>
+<text x="16" y="639" font-size="13" xml:space="preserve" textLength="694.2" lengthAdjust="spacing"><tspan class="dim">  configuration is safe. There is no warranty, and the authors accept no liability and no</tspan></text>
+<text x="16" y="657" font-size="13" xml:space="preserve" textLength="655.2" lengthAdjust="spacing"><tspan class="dim">  responsibility: whether and how you use it is your own decision, at your own risk.</tspan></text>
+</g>
+</svg>

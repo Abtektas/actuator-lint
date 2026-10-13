@@ -9,6 +9,12 @@ own actuator effectiveness and control allocation code on them, and reports the
 resulting matrices and likely configuration mistakes. No vehicle and no
 simulator are needed.
 
+![px4-ca-lint in a terminal: the report for a standard VTOL whose pusher sits above the centre of gravity, with two warnings](docs/images/terminal.svg)
+
+The picture is a shortened copy of a real report; the
+[full one](docs/example-reports/standard_vtol_pusher_offset.md) is in the
+example reports.
+
 It is meant for people who set `CA_*` parameters by hand: custom multirotor
 geometries, planes, and standard, tiltrotor and tailsitter VTOLs. Every
 release is tested with the airframe scripts of PX4 and compared with a running

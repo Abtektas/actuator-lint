@@ -15,6 +15,9 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   is out of date.
   [Reading a report](docs/reading-a-report.md#mix) says how far mix values can
   differ between CPU types.
+- A picture of the tool in a terminal at the top of the README. It is written
+  by `tools/terminal_image.py` from what the tool prints, and a test fails
+  when it is out of date.
 
 ## 0.4.0 - 2026-10-13
 
