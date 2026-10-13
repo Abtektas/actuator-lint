@@ -1,8 +1,9 @@
 # Example reports
 
 The report of every file in [`examples/`](../../examples), as the tool prints it with
-`--format markdown` and the engine for PX4 v1.17.0. They are written by
-`tools/example_reports.py`, and the tests fail when one of them is out of date.
+`--format markdown` and the engine for PX4 v1.17.0 on macOS arm64. They are written by
+`tools/example_reports.py`, and the tests fail when one of them is out of date. On another
+platform the last digit of a value can differ.
 
 [Reading a report](../reading-a-report.md) explains the parts of a report.
 

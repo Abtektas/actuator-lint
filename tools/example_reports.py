@@ -5,8 +5,9 @@ usage: tools/example_reports.py [--check]
 
 The reports show what the tool prints without installing it. They are made
 with the engine the tool finds (see the README), which has to be one built
-against the PX4 version named below. With --check nothing is written and the
-exit code says whether the stored reports are up to date; the tests do that.
+against the PX4 version named below. The stored ones were made on macOS arm64.
+With --check nothing is written and the exit code says whether the stored
+reports are up to date; the tests do that.
 """
 
 import contextlib
@@ -116,8 +117,9 @@ def build() -> dict[str, str]:
             "# Example reports",
             "",
             "The report of every file in [`examples/`](../../examples), as the tool prints it with",
-            f"`--format markdown` and the engine for PX4 {PX4_VERSION}. They are written by",
-            "`tools/example_reports.py`, and the tests fail when one of them is out of date.",
+            f"`--format markdown` and the engine for PX4 {PX4_VERSION} on macOS arm64. They are written by",
+            "`tools/example_reports.py`, and the tests fail when one of them is out of date. On another",
+            "platform the last digit of a value can differ.",
             "",
             "[Reading a report](../reading-a-report.md) explains the parts of a report.",
             "",
@@ -131,14 +133,30 @@ def build() -> dict[str, str]:
 
 
 def out_of_date() -> list[str]:
-    """The stored files that differ from what the tool prints now, or are missing or left over."""
+    """What differs between the stored files and what the tool prints now, one line per difference.
+
+    A file that is missing or left over is one line; of a file with other content the first lines
+    that differ are given, so that the log of a failed run shows what the difference is.
+    """
     files = build()
     stored = {path.name for path in OUTPUT.glob("*.md")} if OUTPUT.is_dir() else set()
-    problems = sorted(stored ^ set(files))
+    problems = [
+        f"{name}: {'not stored' if name in files else 'no example for it'}" for name in sorted(stored ^ set(files))
+    ]
 
     for name in sorted(stored & set(files)):
-        if not same((OUTPUT / name).read_text(encoding="utf-8"), files[name]):
-            problems.append(name)
+        old, new = (OUTPUT / name).read_text(encoding="utf-8"), files[name]
+
+        if same(old, new):
+            continue
+
+        old_lines, new_lines = old.splitlines(), new.splitlines()
+
+        if len(old_lines) != len(new_lines):
+            problems.append(f"{name}: {len(old_lines)} lines stored, {len(new_lines)} printed")
+
+        differing = [(a, b) for a, b in zip(old_lines, new_lines) if not same(a, b)]
+        problems += [f"{name}: stored {a!r}, printed {b!r}" for a, b in differing[:6]]
 
     return problems
 
@@ -148,7 +166,7 @@ if __name__ == "__main__":
         problems = out_of_date()
 
         if problems:
-            raise SystemExit(f"out of date, run tools/example_reports.py: {', '.join(problems)}")
+            raise SystemExit("out of date, run tools/example_reports.py:\n" + "\n".join(problems))
 
     elif sys.argv[1:]:
         raise SystemExit(__doc__)
