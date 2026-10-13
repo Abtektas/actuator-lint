@@ -63,6 +63,9 @@ the engine when you update the tool.
 
 ### Changed
 
+- Every report, the help text, the README and the release notes now say in so
+  many words that there is no warranty, that the authors accept no liability
+  and no responsibility, and that using the tool is the user's own decision.
 - CA002 is a warning, no longer an error, for an axis the vehicle type does not
   need. PX4 `main` drops thrust_x and thrust_y of its own airframe
   `5021_xplane_qtailsitter`, which gave two errors and exit code 1 for a

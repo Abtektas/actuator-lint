@@ -4,5 +4,6 @@ __version__ = "0.4.0"
 
 DISCLAIMER = (
     "This report is a review aid, not an airworthiness approval. No findings does not mean "
-    "the configuration is safe. Use at your own risk."
+    "the configuration is safe. There is no warranty, and the authors accept no liability and "
+    "no responsibility: whether and how you use it is your own decision, at your own risk."
 )

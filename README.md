@@ -10,13 +10,19 @@ resulting matrices and likely configuration mistakes. No vehicle and no
 simulator are needed.
 
 It is meant for people who set `CA_*` parameters by hand: custom multirotor
-geometries, planes, and standard, tiltrotor and tailsitter VTOLs. This is an
-early version; the rules and the output format can still change.
+geometries, planes, and standard, tiltrotor and tailsitter VTOLs. Every
+release is tested with the airframe scripts of PX4 and compared with a running
+PX4, see [docs/versioning.md](docs/versioning.md). The version is below 1.0:
+rules and the output format can still change from one minor version to the
+next, and the [changelog](CHANGELOG.md) says when they do.
 
 ## Safety and liability
 
 - This software is provided "as is", without warranty of any kind. See
   [LICENSE](LICENSE).
+- The project and its authors accept no liability and no responsibility for
+  any use of the tool or of its results. Whether and how you use it is
+  entirely your own decision, at your own risk.
 - It is a review aid. It does not approve a vehicle as safe or airworthy.
 - A report without findings does not mean the configuration is safe. The tool
   only checks what it knows about.

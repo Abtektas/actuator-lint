@@ -27,7 +27,8 @@ EXIT_ERROR = 2
 
 _DESCRIPTION = (
     "Run PX4's control allocation code on a parameter file and report the resulting matrices "
-    "and findings. A review aid, not an airworthiness approval; use at your own risk."
+    "and findings. A review aid, not an airworthiness approval. No warranty and no liability; "
+    "using it is your own decision, at your own risk."
 )
 _ENGINES_DESCRIPTION = (
     "List the engines this tool finds, the PX4 version each was built against, and the one a "

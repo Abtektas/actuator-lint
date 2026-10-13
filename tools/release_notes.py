@@ -16,8 +16,10 @@ See the [README](https://github.com/Abtektas/px4-ca-lint/blob/v{version}/README.
 ## Safety and liability
 
 This software is a review aid, not an airworthiness approval. It is provided
-"as is", without warranty of any kind. A report without findings does not mean
-that a configuration is safe. Use at your own risk.
+"as is", without warranty of any kind, and its authors accept no liability and
+no responsibility for any use of it or of its results. A report without
+findings does not mean that a configuration is safe. Whether and how you use
+it is entirely your own decision, at your own risk.
 """
 
 
