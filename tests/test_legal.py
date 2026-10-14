@@ -14,7 +14,8 @@ ROOT = Path(__file__).parent.parent
 EXAMPLES = ROOT / "examples"
 
 try:
-    ENGINE = str(find_engine())
+    # absolute: the tests run it from another directory, and CI names it with a relative path
+    ENGINE = str(find_engine().resolve())
 except EngineError:
     ENGINE = None
 
