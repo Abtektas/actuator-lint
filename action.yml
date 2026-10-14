@@ -3,7 +3,7 @@ name: px4-ca-lint
 description: >-
   Check PX4 control allocation (CA_*) parameter files with px4-ca-lint.
   A review aid, not an airworthiness approval; no warranty and no liability.
-author: A. Burak Tektas
+author: the px4-ca-lint contributors
 branding:
   icon: check-square
   color: blue

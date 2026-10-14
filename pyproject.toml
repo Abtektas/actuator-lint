@@ -11,7 +11,7 @@ readme = "docs/pypi.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
-authors = [{ name = "A. Burak Tektas" }]
+authors = [{ name = "the px4-ca-lint contributors" }]
 keywords = ["px4", "control allocation", "uav", "drone", "vtol", "lint"]
 classifiers = [
     "Development Status :: 4 - Beta",

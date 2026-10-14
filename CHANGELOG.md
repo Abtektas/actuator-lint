@@ -32,6 +32,9 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
 
 - `px4-ca-lint --version` prints the copyright, the license and the terms in
   short after the version line. The first line is unchanged.
+- The copyright line of the license names "the px4-ca-lint contributors", as
+  do the package metadata and the action. The license (BSD 3-Clause) and its
+  terms are unchanged.
 
 ## 0.4.0 - 2026-10-13
 

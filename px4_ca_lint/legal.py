@@ -5,13 +5,13 @@ from __future__ import annotations
 
 from . import __version__
 
-COPYRIGHT = "Copyright (c) 2026, A. Burak Tektas"
+COPYRIGHT = "Copyright (c) 2026, the px4-ca-lint contributors"
 
 # The same text as the file LICENSE; a test compares them.
 LICENSE = """\
 BSD 3-Clause License
 
-Copyright (c) 2026, A. Burak Tektas
+Copyright (c) 2026, the px4-ca-lint contributors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
