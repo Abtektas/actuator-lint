@@ -3,7 +3,7 @@
 - Input: `examples/tiltrotor.params` (plain format, 26 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 3 (VTOL Tiltrotor), 4 motors, 6 servos
-- Tool: px4-ca-lint 0.4.0
+- Tool: px4-ca-lint 0.4.1
 
 #### Findings
 

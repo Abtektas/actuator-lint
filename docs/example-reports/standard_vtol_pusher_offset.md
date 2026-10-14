@@ -3,12 +3,12 @@
 - Input: `examples/standard_vtol_pusher_offset.params` (plain format, 26 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 2 (Standard VTOL), 5 motors, 3 servos
-- Tool: px4-ca-lint 0.4.0
+- Tool: px4-ca-lint 0.4.1
 
 #### Findings
 
-- **warning [CA010](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA010.md)** (matrix 0): motor4: thrust_x gain up to 4.00 (limit 2); the output saturates at a thrust_x setpoint of 0.25
-- **warning [CA011](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA011.md)** (matrix 0): motor0, motor1, motor2, motor3: commanded by the thrust_x setpoint without producing thrust_x thrust; a thrust_x setpoint changes their output
+- **warning [CA010](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA010.md)** (matrix 0): motor4: thrust_x gain up to 4.00 (limit 2); the output saturates at a thrust_x setpoint of 0.25
+- **warning [CA011](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA011.md)** (matrix 0): motor0, motor1, motor2, motor3: commanded by the thrust_x setpoint without producing thrust_x thrust; a thrust_x setpoint changes their output
 - CA002 was not checked: this PX4 version does not report dropped axes
 
 #### Flight phases

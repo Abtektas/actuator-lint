@@ -3,7 +3,7 @@
 - Input: `examples/tricopter_tilt.params` (plain format, 13 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 8 (MC Tilt), 3 motors, 1 servos
-- Tool: px4-ca-lint 0.4.0
+- Tool: px4-ca-lint 0.4.1
 
 #### Findings
 

@@ -30,7 +30,7 @@ text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation M
 <text x="16" y="63" font-size="13" xml:space="preserve" textLength="444.6" lengthAdjust="spacing"><tspan class="prompt">$ </tspan><tspan class="title">px4-ca-lint examples/standard_vtol_pusher_offset.params</tspan></text>
 <rect class="cover" x="31.6" y="48" width="433.0" height="18" fill="#0d1117" style="transform: translateX(433.0px)"/>
 <g class="part part1">
-<text x="16" y="81" font-size="13" xml:space="preserve" textLength="132.6" lengthAdjust="spacing"><tspan class="plain">px4-ca-lint 0.4.0</tspan></text>
+<text x="16" y="81" font-size="13" xml:space="preserve" textLength="132.6" lengthAdjust="spacing"><tspan class="plain">px4-ca-lint 0.4.1</tspan></text>
 <text x="16" y="117" font-size="13" xml:space="preserve" textLength="655.2" lengthAdjust="spacing"><tspan class="plain">Input:     examples/standard_vtol_pusher_offset.params (plain format, 26 parameters)</tspan></text>
 <text x="16" y="135" font-size="13" xml:space="preserve" textLength="241.8" lengthAdjust="spacing"><tspan class="plain">PX4:       v1.17.0 (d6f12ad1c4)</tspan></text>
 <text x="16" y="153" font-size="13" xml:space="preserve" textLength="312.0" lengthAdjust="spacing"><tspan class="plain">Airframe:  CA_AIRFRAME 2 (Standard VTOL)</tspan></text>
@@ -53,11 +53,11 @@ text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation M
 <text x="16" y="405" font-size="13" xml:space="preserve" textLength="741.0" lengthAdjust="spacing"><tspan class="plain">  </tspan><tspan class="warning">warning</tspan><tspan class="plain"> CA010 matrix 0: motor4: thrust_x gain up to 4.00 (limit 2); the output saturates at a</tspan></text>
 <text x="16" y="423" font-size="13" xml:space="preserve" textLength="226.2" lengthAdjust="spacing"><tspan class="plain">    thrust_x setpoint of 0.25</tspan></text>
 <text x="16" y="441" font-size="13" xml:space="preserve" textLength="265.2" lengthAdjust="spacing"><tspan class="plain">      thrust gain above the limit:</tspan></text>
-<text x="16" y="459" font-size="13" xml:space="preserve" textLength="577.2" lengthAdjust="spacing"><tspan class="dim">        https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA010.md</tspan></text>
+<text x="16" y="459" font-size="13" xml:space="preserve" textLength="577.2" lengthAdjust="spacing"><tspan class="dim">        https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA010.md</tspan></text>
 <text x="16" y="477" font-size="13" xml:space="preserve" textLength="717.6" lengthAdjust="spacing"><tspan class="plain">  </tspan><tspan class="warning">warning</tspan><tspan class="plain"> CA011 matrix 0: motor0, motor1, motor2, motor3: commanded by the thrust_x setpoint</tspan></text>
 <text x="16" y="495" font-size="13" xml:space="preserve" textLength="616.2" lengthAdjust="spacing"><tspan class="plain">    without producing thrust_x thrust; a thrust_x setpoint changes their output</tspan></text>
 <text x="16" y="513" font-size="13" xml:space="preserve" textLength="569.4" lengthAdjust="spacing"><tspan class="plain">      thrust command to an actuator that produces no thrust on that axis:</tspan></text>
-<text x="16" y="531" font-size="13" xml:space="preserve" textLength="577.2" lengthAdjust="spacing"><tspan class="dim">        https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA011.md</tspan></text>
+<text x="16" y="531" font-size="13" xml:space="preserve" textLength="577.2" lengthAdjust="spacing"><tspan class="dim">        https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA011.md</tspan></text>
 <text x="16" y="549" font-size="13" xml:space="preserve" textLength="546.0" lengthAdjust="spacing"><tspan class="plain">  CA002 was not checked: this PX4 version does not report dropped axes</tspan></text>
 <text x="16" y="567" font-size="13" xml:space="preserve" textLength="202.8" lengthAdjust="spacing"><tspan class="plain">  0 error(s), 2 warning(s)</tspan></text>
 </g>

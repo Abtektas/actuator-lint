@@ -153,9 +153,9 @@ also prints the mix of the motors that are left in such a phase.
 ```
 Findings
   warning CA010 matrix 0: motor4: thrust_x gain up to 4.00 (limit 2); the output saturates at a thrust_x setpoint of 0.25
-      thrust gain above the limit: https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA010.md
+      thrust gain above the limit: https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA010.md
   warning CA011 matrix 0: motor0, motor1, motor2, motor3: commanded by the thrust_x setpoint without producing thrust_x thrust; a thrust_x setpoint changes their output
-      thrust command to an actuator that produces no thrust on that axis: https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA011.md
+      thrust command to an actuator that produces no thrust on that axis: https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA011.md
   CA002 was not checked: this PX4 version does not report dropped axes
   0 error(s), 2 warning(s)
 ```

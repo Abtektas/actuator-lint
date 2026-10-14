@@ -3,7 +3,13 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions are explained in [docs/versioning.md](docs/versioning.md).
 
-## Unreleased
+## 0.4.1 - 2026-10-15
+
+Prebuilt engines contain the control allocation code of PX4 v1.17.0
+(`engine_schema` 1), as in 0.4.0. The checks, the rules and the reports are
+the same as in 0.4.0; this release adds the license to the program, the GitHub
+Action, the package metadata for the Python Package Index and documentation.
+An engine of 0.4.0 works with it.
 
 ### Added
 

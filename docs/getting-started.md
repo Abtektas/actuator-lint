@@ -15,7 +15,9 @@ both:
 
 ```
 $ px4-ca-lint --version
-px4-ca-lint 0.4.0
+px4-ca-lint 0.4.1
+Copyright (c) 2026, the px4-ca-lint contributors
+...
 $ px4-ca-lint engines
 ```
 
@@ -82,7 +84,7 @@ it matters and what to look at:
 ```
 Findings
   error CA006 matrix 0: yaw cannot be controlled independently: ...
-      an axis cannot be controlled independently of the others: https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA006.md
+      an axis cannot be controlled independently of the others: https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA006.md
   1 error(s), 0 warning(s)
 ```
 

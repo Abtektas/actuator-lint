@@ -3,11 +3,11 @@
 - Input: `examples/quad_same_spin.params` (plain format, 14 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 0 (Multirotor), 4 motors, 0 servos
-- Tool: px4-ca-lint 0.4.0
+- Tool: px4-ca-lint 0.4.1
 
 #### Findings
 
-- **error [CA006](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.0/rules/CA006.md)** (matrix 0): yaw cannot be controlled independently: its effectiveness row is a combination of the row of thrust_z, so no actuator command changes yaw without changing it. PX4 v1.17.0 computes a mix for it all the same; PX4 main drops such an axis (CA002)
+- **error [CA006](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA006.md)** (matrix 0): yaw cannot be controlled independently: its effectiveness row is a combination of the row of thrust_z, so no actuator command changes yaw without changing it. PX4 v1.17.0 computes a mix for it all the same; PX4 main drops such an axis (CA002)
 - CA002 was not checked: this PX4 version does not report dropped axes
 
 <details><summary>Matrix 0 (sequential_desaturation, roll/pitch/yaw normalised)</summary>

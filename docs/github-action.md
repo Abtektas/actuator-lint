@@ -17,16 +17,16 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - uses: Abtektas/px4-ca-lint@main
+      - uses: Abtektas/px4-ca-lint@v0.4.1
         with:
           files: |
             config/vehicle.params
             airframes/*.params
 ```
 
-The action is on `main` and becomes part of the next release. Until then,
-name a commit instead of `main` (`Abtektas/px4-ca-lint@<full commit SHA>`), so
-that a later change of the action cannot change your workflow.
+Name a release (`@v0.4.1`) or a full commit SHA, not `main`, so that a later
+change of the action cannot change your workflow. The `version` input defaults
+to the release of the action itself.
 
 ## Inputs
 
@@ -36,7 +36,7 @@ that a later change of the action cannot change your workflow.
 | `fail-on` | `error` | Lowest finding level that fails the step: `warning`, `error` or `never`. |
 | `arguments` | empty | Further options for every file, for example `--ignore CA011` or `--max-thrust-gain 3`. |
 | `summary` | `true` | Whether the Markdown reports are added to the job summary. |
-| `version` | `0.4.0` | Release of px4-ca-lint to install. |
+| `version` | `0.4.1` | Release of px4-ca-lint to install. |
 
 ## Outputs
 
