@@ -15,7 +15,7 @@ both:
 
 ```
 $ actuator-lint --version
-actuator-lint 0.4.1
+actuator-lint 0.4.2
 Copyright (c) 2026, the actuator-lint contributors
 ...
 $ actuator-lint engines
@@ -84,7 +84,7 @@ it matters and what to look at:
 ```
 Findings
   error CA006 matrix 0: yaw cannot be controlled independently: ...
-      an axis cannot be controlled independently of the others: https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA006.md
+      an axis cannot be controlled independently of the others: https://github.com/Abtektas/actuator-lint/blob/v0.4.2/rules/CA006.md
   1 error(s), 0 warning(s)
 ```
 

@@ -3,7 +3,7 @@
 - Input: `examples/quad_qgc_export.params` (qgc format, 15 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 0 (Multirotor), 4 motors, 0 servos
-- Tool: actuator-lint 0.4.1
+- Tool: actuator-lint 0.4.2
 
 #### Findings
 

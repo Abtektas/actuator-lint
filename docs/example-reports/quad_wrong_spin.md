@@ -3,11 +3,11 @@
 - Input: `examples/quad_wrong_spin.params` (plain format, 14 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 0 (Multirotor), 4 motors, 0 servos
-- Tool: actuator-lint 0.4.1
+- Tool: actuator-lint 0.4.2
 
 #### Findings
 
-- **warning [CA020](https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA020.md)** (matrix 0): motor2 produces roll and pitch torque but gets no roll and no pitch command. A frequent cause is a wrong spin direction (sign of CA_ROTORn_KM) on this or another motor
+- **warning [CA020](https://github.com/Abtektas/actuator-lint/blob/v0.4.2/rules/CA020.md)** (matrix 0): motor2 produces roll and pitch torque but gets no roll and no pitch command. A frequent cause is a wrong spin direction (sign of CA_ROTORn_KM) on this or another motor
 - CA002 was not checked: this PX4 version does not report dropped axes
 
 <details><summary>Matrix 0 (sequential_desaturation, roll/pitch/yaw normalised)</summary>

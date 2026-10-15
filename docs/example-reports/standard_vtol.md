@@ -3,7 +3,7 @@
 - Input: `examples/standard_vtol.params` (plain format, 25 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 2 (Standard VTOL), 5 motors, 3 servos
-- Tool: actuator-lint 0.4.1
+- Tool: actuator-lint 0.4.2
 
 #### Findings
 

@@ -3,7 +3,12 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions are explained in [docs/versioning.md](docs/versioning.md).
 
-## Unreleased
+## 0.4.2 - 2026-10-15
+
+The first release as actuator-lint. Prebuilt engines contain the control
+allocation code of PX4 v1.17.0 (`engine_schema` 1), as in 0.4.1. The checks,
+the rules and the reports are those of 0.4.1, apart from the name of the tool
+in the reports and the links to its rules.
 
 ### Changed
 

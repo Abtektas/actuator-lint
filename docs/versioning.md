@@ -25,6 +25,8 @@ of the project `actuator-lint` (owner `Abtektas`, repository `actuator-lint`,
 workflow `pypi.yml`, environment `pypi`); no password or token is stored in
 the repository.
 
+Releases 0.1.0 to 0.4.1 were published as px4-ca-lint.
+
 | Tool | Date | PX4 of the prebuilt engines | `engine_schema` |
 |---|---|---|---|
 | 0.1.0 | 2026-10-02 | v1.17.0 | 1 |
@@ -32,6 +34,7 @@ the repository.
 | 0.3.0 | 2026-10-09 | v1.17.0 | 1 |
 | 0.4.0 | 2026-10-13 | v1.17.0 | 1 |
 | 0.4.1 | 2026-10-15 | v1.17.0 | 1 |
+| 0.4.2 | 2026-10-15 | v1.17.0 | 1 |
 
 ## 2. The engine output (`engine_schema`)
 

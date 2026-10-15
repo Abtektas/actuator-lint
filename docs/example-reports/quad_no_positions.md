@@ -3,12 +3,12 @@
 - Input: `examples/quad_no_positions.params` (plain format, 6 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 0 (Multirotor), 4 motors, 0 servos
-- Tool: actuator-lint 0.4.1
+- Tool: actuator-lint 0.4.2
 
 #### Findings
 
-- **error [CA005](https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA005.md)**: roll is not controlled: no actuator has an effect on it. A vehicle with CA_AIRFRAME 0 (Multirotor) needs it
-- **error [CA005](https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA005.md)**: pitch is not controlled: no actuator has an effect on it. A vehicle with CA_AIRFRAME 0 (Multirotor) needs it
+- **error [CA005](https://github.com/Abtektas/actuator-lint/blob/v0.4.2/rules/CA005.md)**: roll is not controlled: no actuator has an effect on it. A vehicle with CA_AIRFRAME 0 (Multirotor) needs it
+- **error [CA005](https://github.com/Abtektas/actuator-lint/blob/v0.4.2/rules/CA005.md)**: pitch is not controlled: no actuator has an effect on it. A vehicle with CA_AIRFRAME 0 (Multirotor) needs it
 - CA002 was not checked: this PX4 version does not report dropped axes
 
 <details><summary>Matrix 0 (sequential_desaturation, roll/pitch/yaw normalised)</summary>

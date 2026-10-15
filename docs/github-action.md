@@ -17,14 +17,14 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - uses: Abtektas/actuator-lint@v0.4.1
+      - uses: Abtektas/actuator-lint@v0.4.2
         with:
           files: |
             config/vehicle.params
             airframes/*.params
 ```
 
-Name a release (`@v0.4.1`) or a full commit SHA, not `main`, so that a later
+Name a release (`@v0.4.2`) or a full commit SHA, not `main`, so that a later
 change of the action cannot change your workflow. The `version` input defaults
 to the release of the action itself.
 
@@ -36,7 +36,7 @@ to the release of the action itself.
 | `fail-on` | `error` | Lowest finding level that fails the step: `warning`, `error` or `never`. |
 | `arguments` | empty | Further options for every file, for example `--ignore CA011` or `--max-thrust-gain 3`. |
 | `summary` | `true` | Whether the Markdown reports are added to the job summary. |
-| `version` | `0.4.1` | Release of actuator-lint to install. |
+| `version` | `0.4.2` | Release of actuator-lint to install. |
 
 ## Outputs
 
