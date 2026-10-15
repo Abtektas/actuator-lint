@@ -1,7 +1,7 @@
 # GitHub Action
 
 The repository is also a GitHub Action: a workflow step that installs a
-release of px4-ca-lint on the runner, checks the parameter files you name and
+release of actuator-lint on the runner, checks the parameter files you name and
 adds their reports to the job summary. The step fails when a file has a
 finding at or above `fail-on`.
 
@@ -13,11 +13,11 @@ permissions:
   contents: read
 
 jobs:
-  px4-ca-lint:
+  actuator-lint:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - uses: Abtektas/px4-ca-lint@v0.4.1
+      - uses: Abtektas/actuator-lint@v0.4.1
         with:
           files: |
             config/vehicle.params
@@ -36,7 +36,7 @@ to the release of the action itself.
 | `fail-on` | `error` | Lowest finding level that fails the step: `warning`, `error` or `never`. |
 | `arguments` | empty | Further options for every file, for example `--ignore CA011` or `--max-thrust-gain 3`. |
 | `summary` | `true` | Whether the Markdown reports are added to the job summary. |
-| `version` | `0.4.1` | Release of px4-ca-lint to install. |
+| `version` | `0.4.1` | Release of actuator-lint to install. |
 
 ## Outputs
 

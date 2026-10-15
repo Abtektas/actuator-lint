@@ -129,7 +129,7 @@ def build() -> str:
     if f"PX4:       {example_reports.PX4_VERSION} " not in report:
         raise SystemExit(f"the engine is not built against PX4 {example_reports.PX4_VERSION}")
 
-    command = f"px4-ca-lint {EXAMPLE}"
+    command = f"actuator-lint {EXAMPLE}"
     prompt = f'<tspan class="prompt">$ </tspan><tspan class="title">{escape(command)}</tspan>'
     body = [text(0, prompt, len(command) + 2)]
     cover_y = TITLE_BAR + PADDING - 2
@@ -162,7 +162,7 @@ def build() -> str:
         [
             f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" '
             f'height="{height}" role="img" aria-labelledby="title description">',
-            "<title id=\"title\">px4-ca-lint in a terminal</title>",
+            "<title id=\"title\">actuator-lint in a terminal</title>",
             f'<desc id="description">The command {escape(command)} and a shortened copy of the report it '
             f"prints: the header, the mix of the first matrix, the findings ({escape(summary)}, exit code {code}) "
             "and the disclaimer.</desc>",

@@ -10,7 +10,7 @@ import xml.dom.minidom
 from pathlib import Path
 from unittest import mock
 
-from px4_ca_lint.engine import EngineError, find_engine, run_engine
+from actuator_lint.engine import EngineError, find_engine, run_engine
 
 ROOT = Path(__file__).parent.parent
 spec = importlib.util.spec_from_file_location("terminal_image", ROOT / "tools" / "terminal_image.py")
@@ -42,7 +42,7 @@ class Pieces(unittest.TestCase):
 
     def test_what_is_left_out_is_counted(self):
         report = [
-            "px4-ca-lint 0.4.0",
+            "actuator-lint 0.4.0",
             "",
             "Matrix 0 (pseudo_inverse)",
             "",

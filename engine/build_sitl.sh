@@ -20,8 +20,8 @@ mkdir -p "${BUILD_DIR}"
 BUILD_DIR="$(cd "${BUILD_DIR}" && pwd -P)"
 
 PYTHON_ARGS=()
-if [ -n "${PX4_CA_PYTHON:-}" ]; then
-	PYTHON_ARGS=(-DPYTHON_EXECUTABLE="${PX4_CA_PYTHON}")
+if [ -n "${ACTUATOR_LINT_PYTHON:-}" ]; then
+	PYTHON_ARGS=(-DPYTHON_EXECUTABLE="${ACTUATOR_LINT_PYTHON}")
 elif [ -x "${PX4_DIR}/.venv/bin/python" ]; then
 	PYTHON_ARGS=(-DPYTHON_EXECUTABLE="${PX4_DIR}/.venv/bin/python")
 fi

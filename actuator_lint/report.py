@@ -61,7 +61,7 @@ def _airframe_notes(engine_result: dict) -> list[str]:
     if engine_result.get("ca_airframe") in _VTOL_AIRFRAMES and "flight_phases" not in engine_result:
         notes.append(
             "this engine does not report which motors PX4 stops in a flight phase; an engine built "
-            "from px4-ca-lint 0.4.0 or newer does"
+            "from tool version 0.4.0 or newer does"
         )
 
     # CA_AIRFRAME 3, tiltrotor VTOL: ActuatorEffectivenessTiltrotorVTOL::getEffectivenessMatrix()
@@ -203,7 +203,7 @@ def render_text(report: dict) -> str:
     px4 = report["px4"]
     airframe = report["airframe"]
     lines = [
-        f"px4-ca-lint {report['tool_version']}",
+        f"actuator-lint {report['tool_version']}",
         "",
         f"Input:     {source['path']} ({source['format']} format, {source['num_parameters']} parameters)",
         f"PX4:       {px4['version']} ({px4['commit'][:10]})",
@@ -308,13 +308,13 @@ def render_markdown(report: dict) -> str:
     airframe = report["airframe"]
     summary = report["summary"]
     lines = [
-        f"### px4-ca-lint report: {summary['errors']} error(s), {summary['warnings']} warning(s)",
+        f"### actuator-lint report: {summary['errors']} error(s), {summary['warnings']} warning(s)",
         "",
         f"- Input: `{source['path']}` ({source['format']} format, {source['num_parameters']} parameters)",
         f"- PX4: `{px4['version']}` (`{px4['commit'][:10]}`)",
         f"- Airframe: `CA_AIRFRAME` {airframe['ca_airframe']} ({airframe['name']}), "
         f"{airframe['num_motors']} motors, {airframe['num_servos']} servos",
-        f"- Tool: px4-ca-lint {report['tool_version']}",
+        f"- Tool: actuator-lint {report['tool_version']}",
         "",
         "#### Findings",
         "",

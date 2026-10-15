@@ -2,11 +2,11 @@
 import json
 import unittest
 
-from px4_ca_lint import DISCLAIMER
-from px4_ca_lint.params import ParamFile
-from px4_ca_lint.report import render_json, render_markdown, render_text
-from px4_ca_lint.report import build_report as _build_report
-from px4_ca_lint.rules import Options, check
+from actuator_lint import DISCLAIMER
+from actuator_lint.params import ParamFile
+from actuator_lint.report import render_json, render_markdown, render_text
+from actuator_lint.report import build_report as _build_report
+from actuator_lint.rules import Options, check
 
 ZERO = [0, 0]
 PHASES = ("hover", "transition_to_forward", "forward", "transition_to_hover")
@@ -186,8 +186,8 @@ class Report(unittest.TestCase):
 
     def test_markdown(self):
         text = render_markdown(build_report(param_file(), engine_result(weak_axes_zeroed=["yaw"])))
-        self.assertIn("### px4-ca-lint report: 0 error(s), 1 warning(s)", text)
-        self.assertIn("- **warning [CA004](https://github.com/Abtektas/px4-ca-lint/blob/", text)
+        self.assertIn("### actuator-lint report: 0 error(s), 1 warning(s)", text)
+        self.assertIn("- **warning [CA004](https://github.com/Abtektas/actuator-lint/blob/", text)
         self.assertIn("| axis | motor0 | servo0 |", text)
         self.assertIn("| roll | 1.500 | -0.500 |", text)
         self.assertIn(f"_{DISCLAIMER}_", text)

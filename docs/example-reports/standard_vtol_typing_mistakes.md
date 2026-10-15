@@ -1,14 +1,14 @@
-### px4-ca-lint report: 1 error(s), 1 warning(s)
+### actuator-lint report: 1 error(s), 1 warning(s)
 
 - Input: `examples/standard_vtol_typing_mistakes.params` (plain format, 25 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 2 (Standard VTOL), 5 motors, 3 servos
-- Tool: px4-ca-lint 0.4.1
+- Tool: actuator-lint 0.4.1
 
 #### Findings
 
-- **error [CA030](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA030.md)**: line 30: CA_ROTOR4_PZ has the value '-0,05', which is not a number, skipped
-- **warning [CA031](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA031.md)**: CA_ROTOR3_PYY: not a parameter of PX4 v1.17.0, ignored. Check the spelling, or the PX4 version the file is for
+- **error [CA030](https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA030.md)**: line 30: CA_ROTOR4_PZ has the value '-0,05', which is not a number, skipped
+- **warning [CA031](https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA031.md)**: CA_ROTOR3_PYY: not a parameter of PX4 v1.17.0, ignored. Check the spelling, or the PX4 version the file is for
 - CA002 was not checked: this PX4 version does not report dropped axes
 
 #### Notes

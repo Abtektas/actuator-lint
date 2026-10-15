@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     environment:
       name: pypi
-      url: https://pypi.org/project/px4-ca-lint/
+      url: https://pypi.org/project/actuator-lint/
     permissions:
       contents: read
       # the package index trusts this workflow by its identity; there is no stored password or token
@@ -38,11 +38,11 @@ jobs:
           VERSION="${VERSION#v}"
           mkdir dist
           gh release download "v${VERSION}" -R "${GITHUB_REPOSITORY}" -D . \
-            -p "px4_ca_lint-${VERSION}-py3-none-any.whl" -p "px4_ca_lint-${VERSION}.tar.gz" -p SHA256SUMS
+            -p "actuator_lint-${VERSION}-py3-none-any.whl" -p "actuator_lint-${VERSION}.tar.gz" -p SHA256SUMS
           sha256sum --ignore-missing -c SHA256SUMS
           # the files were built by the release workflow of this repository
-          gh attestation verify "px4_ca_lint-${VERSION}-py3-none-any.whl" -R "${GITHUB_REPOSITORY}"
-          gh attestation verify "px4_ca_lint-${VERSION}.tar.gz" -R "${GITHUB_REPOSITORY}"
-          mv "px4_ca_lint-${VERSION}-py3-none-any.whl" "px4_ca_lint-${VERSION}.tar.gz" dist/
+          gh attestation verify "actuator_lint-${VERSION}-py3-none-any.whl" -R "${GITHUB_REPOSITORY}"
+          gh attestation verify "actuator_lint-${VERSION}.tar.gz" -R "${GITHUB_REPOSITORY}"
+          mv "actuator_lint-${VERSION}-py3-none-any.whl" "actuator_lint-${VERSION}.tar.gz" dist/
           ls -l dist
       - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2

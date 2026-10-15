@@ -5,13 +5,13 @@ from __future__ import annotations
 
 from . import __version__
 
-COPYRIGHT = "Copyright (c) 2026, the px4-ca-lint contributors"
+COPYRIGHT = "Copyright (c) 2026, the actuator-lint contributors"
 
 # The same text as the file LICENSE; a test compares them.
 LICENSE = """\
 BSD 3-Clause License
 
-Copyright (c) 2026, the px4-ca-lint contributors
+Copyright (c) 2026, the actuator-lint contributors
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,15 +46,20 @@ NO_WARRANTY = (
 )
 
 ENGINE_NOTICE = (
-    "The engine (px4_ca_engine) is built from the control allocation code of PX4, which is "
+    "The engine (actuator_lint_engine) is built from the control allocation code of PX4, which is "
     "copyright (c) 2012 - 2023, PX4 Development Team and licensed under the BSD 3-Clause license. An engine "
     "package contains that license text as LICENSE-PX4. This project is not affiliated with or "
     "endorsed by the PX4 project or the Dronecode Foundation."
 )
 
+TRADEMARK = (
+    "PX4 is a trademark of Dronecode Project, Inc. It is used here only to name the software this tool "
+    "works with. All other trademarks are the property of their respective owners."
+)
+
 
 REVIEW_AID = (
-    "px4-ca-lint is a review aid, not an airworthiness approval. A report without findings does "
+    "actuator-lint is a review aid, not an airworthiness approval. A report without findings does "
     "not mean the configuration is safe. Whether and how you use the tool and its results is your "
     "own decision, at your own risk."
 )
@@ -64,9 +69,9 @@ def version_text() -> str:
     """What --version prints: the version, and the terms in short."""
     return "\n".join(
         [
-            f"px4-ca-lint {__version__}",
+            f"actuator-lint {__version__}",
             COPYRIGHT,
-            'License: BSD-3-Clause. "px4-ca-lint license" prints the full text.',
+            'License: BSD-3-Clause. "actuator-lint license" prints the full text.',
             NO_WARRANTY,
             REVIEW_AID,
         ]
@@ -74,5 +79,7 @@ def version_text() -> str:
 
 
 def license_text() -> str:
-    """What "px4-ca-lint license" prints."""
-    return "\n".join([f"px4-ca-lint {__version__}", "", LICENSE, ENGINE_NOTICE, "", NO_WARRANTY, REVIEW_AID, ""])
+    """What "actuator-lint license" prints."""
+    return "\n".join(
+        [f"actuator-lint {__version__}", "", LICENSE, ENGINE_NOTICE, TRADEMARK, "", NO_WARRANTY, REVIEW_AID, ""]
+    )

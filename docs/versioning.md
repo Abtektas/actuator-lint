@@ -14,12 +14,14 @@ hand. Each release names the PX4 version of its prebuilt engines.
 
 Publishing a release starts two more workflows. "action check" uses the
 [GitHub Action](github-action.md) with the new release; before the tag, the
-default of its `version` input in `action.yml` is set to the new version.
+default of its `version` input in `action.yml` is set to the new version. Until
+the release is published, "action check" on `main` cannot install it, says so
+and checks nothing.
 "pypi" uploads the Python package of the release to the Python Package Index,
 but only when the repository variable `PYPI_PUBLISH` is `true`. An upload
 cannot be undone and a version number cannot be used twice there. It needs,
 once, an account on pypi.org that adds this repository as a trusted publisher
-of the project `px4-ca-lint` (owner `Abtektas`, repository `px4-ca-lint`,
+of the project `actuator-lint` (owner `Abtektas`, repository `actuator-lint`,
 workflow `pypi.yml`, environment `pypi`); no password or token is stored in
 the repository.
 
@@ -105,10 +107,10 @@ requirements.
 Linux x86_64 is built and tested by the CI workflow.
 
 Python for PX4's build scripts: the `.venv` of a PX4 checkout, or the one named
-by `PX4_CA_PYTHON`.
+by `ACTUATOR_LINT_PYTHON`.
 
 The engine is built with PX4's `px4_sitl_default` configuration and only the
-`px4_ca_engine` target is built. The build scripts skip the Gazebo and Protobuf
+`actuator_lint_engine` target is built. The build scripts skip the Gazebo and Protobuf
 lookups, because the tool does not need them and PX4 v1.17.0 does not build
 against every installed Gazebo and Protobuf version.
 
@@ -116,14 +118,14 @@ against every installed Gazebo and Protobuf version.
 
 `engine/package.sh` puts a built engine, this project's license and PX4's
 license into an archive named
-`px4_ca_engine-px4-<PX4 version>-schema<engine_schema>-<platform>.tar.gz` with a
+`actuator_lint_engine-px4-<PX4 version>-schema<engine_schema>-<platform>.tar.gz` with a
 SHA-256 checksum. The CI workflow builds these for every push:
 
 | Platform | Built on | Needs |
 |---|---|---|
 | `linux-x86_64` | Ubuntu 24.04 (PX4's `px4-dev` container), GCC | glibc 2.38 or newer (Ubuntu 24.04; not Ubuntu 22.04 or Debian 12); the C++ runtime is linked statically |
 | `linux-arm64` | the same, on an arm64 runner | the same |
-| `macos-arm64` | macOS 26 runner, Apple clang | macOS 14 or newer (`PX4_CA_MACOS_TARGET` when building) |
+| `macos-arm64` | macOS 26 runner, Apple clang | macOS 14 or newer (`ACTUATOR_LINT_MACOS_TARGET` when building) |
 
 The script prints the exact glibc symbol version and the macOS minimum version
 of each build. A package is refused when the PX4 tree it was built from had

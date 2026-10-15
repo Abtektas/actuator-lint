@@ -1,13 +1,13 @@
-### px4-ca-lint report: 0 error(s), 1 warning(s)
+### actuator-lint report: 0 error(s), 1 warning(s)
 
 - Input: `examples/tiltrotor_tilt_servo_missing.params` (plain format, 26 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 3 (VTOL Tiltrotor), 4 motors, 5 servos
-- Tool: px4-ca-lint 0.4.1
+- Tool: actuator-lint 0.4.1
 
 #### Findings
 
-- **warning [CA022](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA022.md)**: motor0: CA_ROTOR0_TILT is 2, but CA_SV_TL_COUNT is 1; PX4 treats the rotor as not tilting
+- **warning [CA022](https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA022.md)**: motor0: CA_ROTOR0_TILT is 2, but CA_SV_TL_COUNT is 1; PX4 treats the rotor as not tilting
 - CA002 was not checked: this PX4 version does not report dropped axes
 
 #### Notes

@@ -2,8 +2,8 @@
 import json
 import unittest
 
-from px4_ca_lint import DISCLAIMER
-from px4_ca_lint.diff import ABSENT, build_diff, render_json, render_markdown, render_text
+from actuator_lint import DISCLAIMER
+from actuator_lint.diff import ABSENT, build_diff, render_json, render_markdown, render_text
 
 AXES = ("roll", "pitch", "yaw", "thrust_x", "thrust_y", "thrust_z")
 

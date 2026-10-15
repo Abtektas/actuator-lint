@@ -35,7 +35,7 @@ jobs:
       - name: Check that the tag matches the package version
         if: github.event_name == 'push'
         run: |
-          version="$(python -c 'import px4_ca_lint; print(px4_ca_lint.__version__)')"
+          version="$(python -c 'import actuator_lint; print(actuator_lint.__version__)')"
           if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
             echo "tag ${GITHUB_REF_NAME} does not match package version ${version}" >&2
             exit 1
@@ -52,7 +52,7 @@ jobs:
           python -m twine check --strict dist/*
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          pattern: px4_ca_engine-*
+          pattern: actuator_lint_engine-*
           path: dist
           merge-multiple: true
       - name: Checksums and release notes
@@ -64,7 +64,7 @@ jobs:
           sha256sum ./* | sed 's| \./| |' > SHA256SUMS
           cat SHA256SUMS
           cd ..
-          python tools/release_notes.py "$(python -c 'import px4_ca_lint; print(px4_ca_lint.__version__)')" > notes.md
+          python tools/release_notes.py "$(python -c 'import actuator_lint; print(actuator_lint.__version__)')" > notes.md
           cat notes.md
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: github.event_name != 'push'

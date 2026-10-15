@@ -6,8 +6,8 @@ import subprocess
 import unittest
 from pathlib import Path
 
-from px4_ca_lint import DISCLAIMER, __version__, legal
-from px4_ca_lint.engine import EngineError, find_engine
+from actuator_lint import DISCLAIMER, __version__, legal
+from actuator_lint.engine import EngineError, find_engine
 from tests.test_cli import run
 
 ROOT = Path(__file__).parent.parent
@@ -35,7 +35,7 @@ class Terms(unittest.TestCase):
             self.assertEqual(stop.exception.code, 0)
 
         lines = legal.version_text().split("\n")
-        self.assertEqual(lines[0], f"px4-ca-lint {__version__}")
+        self.assertEqual(lines[0], f"actuator-lint {__version__}")
         self.assertIn("BSD-3-Clause", lines[2])
         self.assertIn("without warranty of any kind", lines[3])
         self.assertIn("no liability and no responsibility", lines[3])
@@ -48,15 +48,16 @@ class Terms(unittest.TestCase):
         self.assertIn(legal.LICENSE, stdout)
         self.assertIn("PX4 Development Team", stdout)
         self.assertIn("not affiliated with or endorsed by", stdout)
+        self.assertIn(legal.TRADEMARK, stdout)
         self.assertIn(legal.NO_WARRANTY, stdout)
         self.assertIn(legal.REVIEW_AID, stdout)
 
     def test_help_names_the_terms(self):
-        from px4_ca_lint.cli import _check_parser
+        from actuator_lint.cli import _check_parser
 
         text = " ".join(_check_parser().format_help().split())
         self.assertIn("No warranty and no liability", text)
-        self.assertIn("px4-ca-lint license", text)
+        self.assertIn("actuator-lint license", text)
 
     def test_every_source_file_names_its_license(self):
         files = subprocess.run(
@@ -91,7 +92,7 @@ class Reports(unittest.TestCase):
             self.assertIn(DISCLAIMER, stdout, f"diff as {report_format}")
 
     def test_no_option_leaves_the_disclaimer_out(self):
-        from px4_ca_lint.cli import _check_parser, _diff_parser
+        from actuator_lint.cli import _check_parser, _diff_parser
 
         for parser in (_check_parser(), _diff_parser()):
             options = [option for action in parser._actions for option in action.option_strings]
@@ -108,12 +109,12 @@ class Reports(unittest.TestCase):
         source = (ROOT / "engine" / "src" / "main.cpp").read_text(encoding="utf-8")
         self.assertIn("without warranty of any kind", source)
         self.assertIn("accept no liability", source)
-        self.assertIn('"usage: px4_ca_engine <params file> <output json>\\n\\n%s\\n", NOTICE', source)
+        self.assertIn('"usage: actuator_lint_engine <params file> <output json>\\n\\n%s\\n", NOTICE', source)
 
     def test_the_engine_prints_its_notice(self):
         result = subprocess.run([ENGINE], capture_output=True, text=True, env={**os.environ})
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("usage: px4_ca_engine", result.stderr)
+        self.assertIn("usage: actuator_lint_engine", result.stderr)
 
         if "PX4 Development Team" not in result.stderr:
             self.skipTest("an engine built before the notice was added")

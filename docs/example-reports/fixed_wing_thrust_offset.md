@@ -1,13 +1,13 @@
-### px4-ca-lint report: 0 error(s), 1 warning(s)
+### actuator-lint report: 0 error(s), 1 warning(s)
 
 - Input: `examples/fixed_wing_thrust_offset.params` (plain format, 13 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 1 (Fixed Wing), 1 motors, 4 servos
-- Tool: px4-ca-lint 0.4.1
+- Tool: actuator-lint 0.4.1
 
 #### Findings
 
-- **warning [CA011](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA011.md)** (matrix 0): servo2: commanded by the thrust_x setpoint without producing thrust_x thrust; a thrust_x setpoint changes their output
+- **warning [CA011](https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA011.md)** (matrix 0): servo2: commanded by the thrust_x setpoint without producing thrust_x thrust; a thrust_x setpoint changes their output
 - CA002 was not checked: this PX4 version does not report dropped axes
 
 <details><summary>Matrix 0 (pseudo_inverse)</summary>

@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 INSTALL = """
 ## Install
 
-See the [README](https://github.com/Abtektas/px4-ca-lint/blob/v{version}/README.md#install).
+See the [README](https://github.com/Abtektas/actuator-lint/blob/v{version}/README.md#install).
 `SHA256SUMS` lists the checksum of every file of this release.
 
 ## Safety and liability
@@ -21,7 +21,13 @@ This software is a review aid, not an airworthiness approval. It is provided
 no responsibility for any use of it or of its results. A report without
 findings does not mean that a configuration is safe. Whether and how you use
 it is entirely your own decision, at your own risk.
+
+This project is not affiliated with or endorsed by the PX4 project or the
+Dronecode Foundation. PX4 is a trademark of Dronecode Project, Inc. It is used
+here only to name the software this tool works with.
 """
+
+REPOSITORY = "https://github.com/Abtektas/actuator-lint"
 
 
 def changelog_section(version: str) -> str:
@@ -34,12 +40,17 @@ def changelog_section(version: str) -> str:
     return match.group(1).strip()
 
 
+def absolute_links(text: str, version: str) -> str:
+    """Links inside the repository, made absolute: on the release page a relative link does not resolve."""
+    return re.sub(r"\]\((?!https?://|#)([^)]+)\)", rf"]({REPOSITORY}/blob/v{version}/\1)", text)
+
+
 def main() -> None:
     if len(sys.argv) != 2:
         raise SystemExit("usage: release_notes.py <version>")
 
     version = sys.argv[1]
-    print(changelog_section(version))
+    print(absolute_links(changelog_section(version), version))
     print(INSTALL.format(version=version))
 
 

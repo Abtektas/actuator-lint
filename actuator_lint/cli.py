@@ -89,7 +89,7 @@ def _add_common_options(parser: argparse.ArgumentParser, fail_on_help: str) -> N
     parser.add_argument(
         "--engine",
         metavar="PATH",
-        help=f"path to px4_ca_engine (default: ${ENGINE_ENV}, then build/engine, then the user data directory)",
+        help=f"path to actuator_lint_engine (default: ${ENGINE_ENV}, then build/engine, then the user data directory)",
     )
     parser.add_argument(
         "--px4",
@@ -119,11 +119,11 @@ def _add_common_options(parser: argparse.ArgumentParser, fail_on_help: str) -> N
 
 def _check_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="px4-ca-lint",
+        prog="actuator-lint",
         description=_DESCRIPTION,
-        epilog="To compare two parameter files: px4-ca-lint diff BEFORE AFTER. "
-        "To list the installed engines: px4-ca-lint engines. "
-        "To print the license and the notices: px4-ca-lint license",
+        epilog="To compare two parameter files: actuator-lint diff BEFORE AFTER. "
+        "To list the installed engines: actuator-lint engines. "
+        "To print the license and the notices: actuator-lint license",
     )
     parser.add_argument("file", help="parameter file (plain, PX4 airframe script or QGroundControl export)")
     _add_common_options(parser, "lowest finding level that gives exit code 1 (default: error)")
@@ -131,7 +131,7 @@ def _check_parser() -> argparse.ArgumentParser:
 
 
 def _diff_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="px4-ca-lint diff", description=_DIFF_DESCRIPTION)
+    parser = argparse.ArgumentParser(prog="actuator-lint diff", description=_DIFF_DESCRIPTION)
     parser.add_argument("before", help="parameter file to compare from")
     parser.add_argument("after", help="parameter file to compare to")
     _add_common_options(
@@ -141,7 +141,7 @@ def _diff_parser() -> argparse.ArgumentParser:
 
 
 def _engines_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="px4-ca-lint engines", description=_ENGINES_DESCRIPTION)
+    parser = argparse.ArgumentParser(prog="actuator-lint engines", description=_ENGINES_DESCRIPTION)
     parser.add_argument(
         "--version", action=_Version, nargs=0, help="show the version and the terms in short, and exit"
     )
@@ -230,11 +230,11 @@ def main(argv: list[str] | None = None) -> int:
         _write(text, args.output)
 
     except (ParamFileError, EngineError) as error:
-        print(f"px4-ca-lint: error: {error}", file=sys.stderr)
+        print(f"actuator-lint: error: {error}", file=sys.stderr)
         return EXIT_ERROR
 
     except OSError as error:
-        print(f"px4-ca-lint: error: {error.filename}: {error.strerror}", file=sys.stderr)
+        print(f"actuator-lint: error: {error.filename}: {error.strerror}", file=sys.stderr)
         return EXIT_ERROR
 
     return EXIT_FINDINGS if _fails(findings, args.fail_on) else EXIT_OK

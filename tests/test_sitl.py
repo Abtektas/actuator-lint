@@ -12,7 +12,7 @@ compared here.
 
 Needs a PX4 SITL build and an engine built from the same PX4 version:
 
-    PX4_CA_SITL_BUILD=<build dir of px4_sitl_default> PX4_CA_ENGINE=<px4_ca_engine> \\
+    ACTUATOR_LINT_SITL_BUILD=<build dir of px4_sitl_default> ACTUATOR_LINT_ENGINE=<actuator_lint_engine> \\
         python3 -m unittest tests.test_sitl
 """
 
@@ -26,12 +26,12 @@ import time
 import unittest
 from pathlib import Path
 
-from px4_ca_lint.engine import find_engine, run_engine
-from px4_ca_lint.params import parse_file
-from px4_ca_lint.rules import AXES
+from actuator_lint.engine import find_engine, run_engine
+from actuator_lint.params import parse_file
+from actuator_lint.rules import AXES
 
-SITL_BUILD = os.environ.get("PX4_CA_SITL_BUILD")
-INSTANCE = os.environ.get("PX4_CA_SITL_INSTANCE", "7")
+SITL_BUILD = os.environ.get("ACTUATOR_LINT_SITL_BUILD")
+INSTANCE = os.environ.get("ACTUATOR_LINT_SITL_INSTANCE", "7")
 START_TIMEOUT_S = 40
 # a PX4 client command normally returns within milliseconds
 CLIENT_TIMEOUT_S = 5
@@ -64,7 +64,7 @@ def parse_matrices(text: str) -> list[list[list[float]]]:
 class Sitl:
     def __init__(self, build: Path, autostart: int):
         self.bin = build / "bin"
-        self.directory = tempfile.TemporaryDirectory(prefix="px4-ca-lint-sitl-")
+        self.directory = tempfile.TemporaryDirectory(prefix="actuator-lint-sitl-")
         self.log_path = Path(self.directory.name) / "px4.log"
         self.log = open(self.log_path, "w")
         self.status = ""
@@ -241,7 +241,7 @@ class Stop(unittest.TestCase):
         self.assertTrue(wait_for(lambda: not has_writer(fifo)))
 
 
-@unittest.skipIf(SITL_BUILD is None, "PX4_CA_SITL_BUILD is not set")
+@unittest.skipIf(SITL_BUILD is None, "ACTUATOR_LINT_SITL_BUILD is not set")
 class CrossCheck(unittest.TestCase):
     def compare(self, autostart: int, overrides: dict[str, str] | None = None) -> dict:
         sitl = Sitl(Path(SITL_BUILD).resolve(), autostart)

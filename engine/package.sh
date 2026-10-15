@@ -3,14 +3,14 @@
 # Put a built engine into an archive with a checksum, and print what it needs
 # from the system it runs on.
 #
-# usage: engine/package.sh <px4_ca_engine> <path to PX4-Autopilot> <platform, e.g. linux-x86_64> <output directory>
+# usage: engine/package.sh <actuator_lint_engine> <path to PX4-Autopilot> <platform, e.g. linux-x86_64> <output directory>
 #
 # The archive contains PX4's license text, because the engine contains compiled
 # PX4 code.
 set -euo pipefail
 
 if [ $# -ne 4 ]; then
-	echo "usage: $0 <px4_ca_engine> <path to PX4-Autopilot> <platform> <output directory>" >&2
+	echo "usage: $0 <actuator_lint_engine> <path to PX4-Autopilot> <platform> <output directory>" >&2
 	exit 64
 fi
 
@@ -40,14 +40,14 @@ case "${PX4_VERSION}" in
 	;;
 esac
 
-NAME="px4_ca_engine-px4-${PX4_VERSION}-schema${SCHEMA}-${PLATFORM}"
+NAME="actuator_lint_engine-px4-${PX4_VERSION}-schema${SCHEMA}-${PLATFORM}"
 mkdir -p "${OUT}" "${WORK}/${NAME}"
-cp "${ENGINE}" "${WORK}/${NAME}/px4_ca_engine"
+cp "${ENGINE}" "${WORK}/${NAME}/actuator_lint_engine"
 cp "${HERE}/../LICENSE" "${WORK}/${NAME}/LICENSE"
 cp "${PX4_DIR}/LICENSE" "${WORK}/${NAME}/LICENSE-PX4"
 
 {
-	echo "px4_ca_engine for px4-ca-lint"
+	echo "actuator_lint_engine for actuator-lint"
 	echo "PX4 version: ${PX4_VERSION}"
 	echo "engine_schema: ${SCHEMA}"
 	echo "platform: ${PLATFORM}"
@@ -55,11 +55,14 @@ cp "${PX4_DIR}/LICENSE" "${WORK}/${NAME}/LICENSE-PX4"
 	echo "This program contains compiled code of the PX4 Autopilot project"
 	echo "(https://github.com/PX4/PX4-Autopilot), copyright PX4 Development Team,"
 	echo "licensed under the BSD 3-Clause license. Its license text is in LICENSE-PX4."
-	echo "The px4-ca-lint code is licensed as stated in LICENSE."
+	echo "The actuator-lint code is licensed as stated in LICENSE."
 	echo
 	echo "Provided \"as is\", without warranty of any kind. The authors and contributors"
 	echo "accept no liability and no responsibility for any use of it or of its results."
 	echo "A review aid, not an airworthiness approval. See LICENSE."
+	echo
+	echo "PX4 is a trademark of Dronecode Project, Inc. This project is not affiliated"
+	echo "with or endorsed by the PX4 project or the Dronecode Foundation."
 } > "${WORK}/${NAME}/README.txt"
 
 tar -C "${WORK}" -czf "${OUT}/${NAME}.tar.gz" "${NAME}"

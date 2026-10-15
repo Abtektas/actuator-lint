@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-"""Find and run the px4_ca_engine executable."""
+"""Find and run the actuator_lint_engine executable."""
 
 from __future__ import annotations
 
@@ -13,12 +13,12 @@ from pathlib import Path
 # engine_schema values this version of the tool can read, see docs/versioning.md
 SUPPORTED_ENGINE_SCHEMAS = (1,)
 
-ENGINE_ENV = "PX4_CA_ENGINE"
-PX4_ENV = "PX4_CA_PX4"
-ENGINE_NAME = "px4_ca_engine"
+ENGINE_ENV = "ACTUATOR_LINT_ENGINE"
+PX4_ENV = "ACTUATOR_LINT_PX4"
+ENGINE_NAME = "actuator_lint_engine"
 _TIMEOUT_S = 60
 
-# exit codes of px4_ca_engine
+# exit codes of actuator_lint_engine
 _EXIT_INPUT = 65
 _EXIT_UNSUPPORTED = 66
 _EXIT_PX4_FAILED = 67
@@ -30,7 +30,7 @@ class EngineError(Exception):
 
 def user_data_directory() -> Path:
     data_home = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
-    return Path(data_home) / "px4-ca-lint"
+    return Path(data_home) / "actuator-lint"
 
 
 def user_engine_path() -> Path:
@@ -62,7 +62,7 @@ _RELEASE = re.compile(r"v\d+\.\d+\.\d+(-(alpha|beta|rc)\d+)?")
 
 
 def requested_px4(option: str | None = None) -> str | None:
-    """The PX4 version asked for with --px4 or $PX4_CA_PX4, written the way PX4 tags it."""
+    """The PX4 version asked for with --px4 or $ACTUATOR_LINT_PX4, written the way PX4 tags it."""
     name = (option or os.environ.get(PX4_ENV) or "").strip()
 
     if not name:
@@ -85,8 +85,8 @@ def default_locations() -> list[Path]:
 def find_engine(explicit: str | None = None, px4: str | None = None) -> Path:
     """Choose the engine.
 
-    An engine named with --engine or $PX4_CA_ENGINE is used as it is. Otherwise a PX4 version
-    (--px4 or $PX4_CA_PX4, see requested_px4) selects the engine installed for that version, and
+    An engine named with --engine or $ACTUATOR_LINT_ENGINE is used as it is. Otherwise a PX4 version
+    (--px4 or $ACTUATOR_LINT_PX4, see requested_px4) selects the engine installed for that version, and
     without one the default locations are tried. They are also tried for a PX4 release that has
     no engine installed under its name: check_px4_version then decides whether the engine fits.
     """
@@ -159,7 +159,7 @@ def run_engine(engine: Path, params: dict[str, str]) -> dict:
 
     When PX4 cannot produce a matrix the output has an "error" entry and no matrices.
     """
-    with tempfile.TemporaryDirectory(prefix="px4-ca-lint-") as directory:
+    with tempfile.TemporaryDirectory(prefix="actuator-lint-") as directory:
         params_path = Path(directory) / "input.params"
         output_path = Path(directory) / "output.json"
         params_path.write_text(
@@ -205,7 +205,7 @@ def run_engine(engine: Path, params: dict[str, str]) -> dict:
         code = 0
 
     if code == 0 and result is None:
-        raise EngineError(f"the engine '{engine}' wrote no output that can be read; is it px4_ca_engine?")
+        raise EngineError(f"the engine '{engine}' wrote no output that can be read; is it actuator_lint_engine?")
 
     if code != 0 or result is None:
         detail = process.stderr.strip().splitlines()[-1:] or ["no error message"]

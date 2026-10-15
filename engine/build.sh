@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Build px4_ca_engine against a PX4 source tree without modifying that tree.
+# Build actuator_lint_engine against a PX4 source tree without modifying that tree.
 #
 # usage: engine/build.sh <path to PX4-Autopilot> [build directory]
 #
 # PX4's build needs a Python with PX4's requirements installed. It is taken
-# from PX4_CA_PYTHON if set, else from <PX4-Autopilot>/.venv, else from PATH.
+# from ACTUATOR_LINT_PYTHON if set, else from <PX4-Autopilot>/.venv, else from PATH.
 set -euo pipefail
 
 if [ $# -lt 1 ]; then
@@ -22,8 +22,8 @@ BUILD_DIR="$(cd "${BUILD_DIR}" && pwd -P)"
 # The engine does not need Gazebo. Skipping the lookup keeps the build
 # independent of whatever Gazebo version is installed on the host.
 PYTHON_ARGS=()
-if [ -n "${PX4_CA_PYTHON:-}" ]; then
-	PYTHON_ARGS=(-DPYTHON_EXECUTABLE="${PX4_CA_PYTHON}")
+if [ -n "${ACTUATOR_LINT_PYTHON:-}" ]; then
+	PYTHON_ARGS=(-DPYTHON_EXECUTABLE="${ACTUATOR_LINT_PYTHON}")
 elif [ -x "${PX4_DIR}/.venv/bin/python" ]; then
 	PYTHON_ARGS=(-DPYTHON_EXECUTABLE="${PX4_DIR}/.venv/bin/python")
 fi
@@ -31,7 +31,7 @@ fi
 # On macOS, let the engine run on older systems than the one it is built on.
 PLATFORM_ARGS=()
 if [ "$(uname)" = "Darwin" ]; then
-	PLATFORM_ARGS=(-DCMAKE_OSX_DEPLOYMENT_TARGET="${PX4_CA_MACOS_TARGET:-14.0}")
+	PLATFORM_ARGS=(-DCMAKE_OSX_DEPLOYMENT_TARGET="${ACTUATOR_LINT_MACOS_TARGET:-14.0}")
 fi
 
 cmake -S "${PX4_DIR}" -B "${BUILD_DIR}" -G Ninja \
@@ -46,5 +46,5 @@ cmake -S "${PX4_DIR}" -B "${BUILD_DIR}" -G Ninja \
 	${PLATFORM_ARGS[@]+"${PLATFORM_ARGS[@]}"} \
 	${PYTHON_ARGS[@]+"${PYTHON_ARGS[@]}"}
 
-cmake --build "${BUILD_DIR}" --target px4_ca_engine
-echo "built: ${BUILD_DIR}/px4_ca_engine"
+cmake --build "${BUILD_DIR}" --target actuator_lint_engine
+echo "built: ${BUILD_DIR}/actuator_lint_engine"

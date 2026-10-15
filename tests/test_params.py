@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from px4_ca_lint.params import ParamFileError, detect_format, parse_file, parse_text
+from actuator_lint.params import ParamFileError, detect_format, parse_file, parse_text
 
 
 class DetectFormat(unittest.TestCase):

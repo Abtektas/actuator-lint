@@ -8,7 +8,7 @@ import importlib.util
 import unittest
 from pathlib import Path
 
-from px4_ca_lint.engine import EngineError, find_engine, run_engine
+from actuator_lint.engine import EngineError, find_engine, run_engine
 
 ROOT = Path(__file__).parent.parent
 spec = importlib.util.spec_from_file_location("example_reports", ROOT / "tools" / "example_reports.py")
@@ -60,9 +60,9 @@ class ExampleReports(unittest.TestCase):
             self.assertEqual(len(example_reports.out_of_date()), 2)
 
     def test_version_strings_do_not_count(self):
-        link = "[CA010](https://github.com/Abtektas/px4-ca-lint/blob/{}/rules/CA010.md)"
-        first = "- Tool: px4-ca-lint 0.4.0\n" + link.format("v0.4.0")
-        second = "- Tool: px4-ca-lint 0.5.0.dev0\n" + link.format("main")
+        link = "[CA010](https://github.com/Abtektas/actuator-lint/blob/{}/rules/CA010.md)"
+        first = "- Tool: actuator-lint 0.4.0\n" + link.format("v0.4.0")
+        second = "- Tool: actuator-lint 0.5.0.dev0\n" + link.format("main")
         self.assertEqual(example_reports.normalised(first), example_reports.normalised(second))
         self.assertNotEqual(example_reports.normalised(first), example_reports.normalised(first + " "))
 

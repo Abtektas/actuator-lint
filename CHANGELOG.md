@@ -3,6 +3,33 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions are explained in [docs/versioning.md](docs/versioning.md).
 
+## Unreleased
+
+### Changed
+
+- The project is now called actuator-lint; releases 0.1.0 to 0.4.1 were px4-ca-lint.
+  The name no longer contains PX4, which is a trademark of Dronecode Project,
+  Inc. What it does is unchanged. For you this means:
+  - the command is `actuator-lint` and the Python package `actuator-lint`
+    (module `actuator_lint`); uninstall `px4-ca-lint` and install the new
+    package,
+  - the engine is `actuator_lint_engine`, and installed engines are looked for
+    in `~/.local/share/actuator-lint/engines/`; move an engine from
+    `~/.local/share/px4-ca-lint/engines/` there and rename it, or install the
+    engine of this release,
+  - the environment variables start with `ACTUATOR_LINT_` instead of
+    `PX4_CA_`, for example `$ACTUATOR_LINT_ENGINE` and `$ACTUATOR_LINT_PX4`,
+  - the repository is `Abtektas/actuator-lint`, and the GitHub Action is
+    `uses: Abtektas/actuator-lint@...`; GitHub does not redirect the old name
+    for actions,
+  - reports name the tool `actuator-lint` and link the rules in the new
+    repository. The JSON fields are unchanged.
+- The license output, the engine, the engine packages, the README and the
+  release notes say that PX4 is a trademark of Dronecode Project, Inc., used
+  here only to name the software the tool works with.
+- Release notes link files of the repository with absolute links, which work
+  on the release page.
+
 ## 0.4.1 - 2026-10-15
 
 Prebuilt engines contain the control allocation code of PX4 v1.17.0

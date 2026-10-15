@@ -1,13 +1,13 @@
-### px4-ca-lint report: 1 error(s), 0 warning(s)
+### actuator-lint report: 1 error(s), 0 warning(s)
 
 - Input: `examples/standard_vtol_pusher_backwards.params` (plain format, 25 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 2 (Standard VTOL), 5 motors, 3 servos
-- Tool: px4-ca-lint 0.4.1
+- Tool: actuator-lint 0.4.1
 
 #### Findings
 
-- **error [CA012](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA012.md)** (matrix 0): motor4: PX4 takes the thrust as pointing backwards (negative thrust_x effectiveness), but a rotor for forward thrust has to point forwards. Check the sign of CA_ROTORn_AX and CA_ROTORn_CT
+- **error [CA012](https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA012.md)** (matrix 0): motor4: PX4 takes the thrust as pointing backwards (negative thrust_x effectiveness), but a rotor for forward thrust has to point forwards. Check the sign of CA_ROTORn_AX and CA_ROTORn_CT
 - CA002 was not checked: this PX4 version does not report dropped axes
 
 #### Flight phases

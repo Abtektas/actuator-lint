@@ -81,7 +81,7 @@ def rule_url(rule_id: str) -> str:
     from . import __version__
 
     ref = "main" if "dev" in __version__ else f"v{__version__}"
-    return f"https://github.com/Abtektas/px4-ca-lint/blob/{ref}/rules/{rule_id}.md"
+    return f"https://github.com/Abtektas/actuator-lint/blob/{ref}/rules/{rule_id}.md"
 
 
 @dataclass(frozen=True)

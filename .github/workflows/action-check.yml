@@ -2,6 +2,11 @@ name: action check
 
 # Uses the GitHub Action of this repository the way another repository would:
 # it installs a published release and checks files of examples/.
+#
+# The action installs the release named by the default of its version input,
+# which is set to the next release before that release is tagged. Until the
+# release is published, a push to main cannot check the action and says so;
+# publishing the release runs the check in full.
 
 on:
   push:
@@ -32,8 +37,26 @@ jobs:
         runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-26]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: The release the action installs
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          version="$(awk '/^  version:/ { input = 1 } input && /default:/ { gsub(/[" ]|default:/, ""); print; exit }' action.yml)"
+          echo "the action installs release ${version}"
+          test -n "${version}"
+
+          if [ "${EVENT}" = release ] \
+            || [ "$(gh release view "v${version}" -R "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft 2> /dev/null)" = false ]; then
+            echo "published=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "::notice::release ${version} is not published yet, so the action is not checked; publishing it runs this check"
+            echo "published=false" >> "${GITHUB_OUTPUT}"
+          fi
       - name: Files without error findings
         id: good
+        if: steps.release.outputs.published == 'true'
         uses: ./
         with:
           files: |
@@ -41,6 +64,7 @@ jobs:
             examples/tilt*.params
       - name: A file with an error finding
         id: bad
+        if: steps.release.outputs.published == 'true'
         continue-on-error: true
         uses: ./
         with:
@@ -48,12 +72,14 @@ jobs:
           summary: "false"
       - name: The same file, findings allowed
         id: allowed
+        if: steps.release.outputs.published == 'true'
         uses: ./
         with:
           files: examples/quad_rotor_down.params
           fail-on: never
           summary: "false"
       - name: Check the results
+        if: steps.release.outputs.published == 'true'
         env:
           GOOD_FILES: ${{ steps.good.outputs.files }}
           GOOD_FAILED: ${{ steps.good.outputs.failed }}

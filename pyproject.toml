@@ -3,7 +3,7 @@ requires = ["hatchling>=1.32"]
 build-backend = "hatchling.build"
 
 [project]
-name = "px4-ca-lint"
+name = "actuator-lint"
 dynamic = ["version"]
 description = "Offline review aid for PX4 control allocation parameters"
 # the README has links inside the repository, which the package index does not resolve
@@ -11,7 +11,7 @@ readme = "docs/pypi.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
-authors = [{ name = "the px4-ca-lint contributors" }]
+authors = [{ name = "the actuator-lint contributors" }]
 keywords = ["px4", "control allocation", "uav", "drone", "vtol", "lint"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -31,16 +31,16 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/Abtektas/px4-ca-lint"
-Documentation = "https://github.com/Abtektas/px4-ca-lint/blob/main/docs/getting-started.md"
-Changelog = "https://github.com/Abtektas/px4-ca-lint/blob/main/CHANGELOG.md"
-Issues = "https://github.com/Abtektas/px4-ca-lint/issues"
+Homepage = "https://github.com/Abtektas/actuator-lint"
+Documentation = "https://github.com/Abtektas/actuator-lint/blob/main/docs/getting-started.md"
+Changelog = "https://github.com/Abtektas/actuator-lint/blob/main/CHANGELOG.md"
+Issues = "https://github.com/Abtektas/actuator-lint/issues"
 
 [project.scripts]
-px4-ca-lint = "px4_ca_lint.cli:main"
+actuator-lint = "actuator_lint.cli:main"
 
 [tool.hatch.version]
-path = "px4_ca_lint/__init__.py"
+path = "actuator_lint/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["px4_ca_lint"]
+packages = ["actuator_lint"]

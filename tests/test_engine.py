@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from px4_ca_lint.engine import (
+from actuator_lint.engine import (
     ENGINE_ENV,
     PX4_ENV,
     EngineError,
@@ -21,8 +21,8 @@ from px4_ca_lint.engine import (
 
 
 def fake_engine(directory: Path, script: str) -> Path:
-    """An executable that stands in for px4_ca_engine. $1 is the parameter file, $2 the output."""
-    path = directory / "px4_ca_engine"
+    """An executable that stands in for actuator_lint_engine. $1 is the parameter file, $2 the output."""
+    path = directory / "actuator_lint_engine"
     path.write_text("#!/bin/sh\n" + script)
     path.chmod(path.stat().st_mode | stat.S_IXUSR)
     return path
@@ -46,7 +46,7 @@ class FindEngine(unittest.TestCase):
         return fake_engine(versioned_engine_path(px4).parent, "exit 0\n")
 
     def test_user_data_directory(self):
-        self.assertEqual(user_engine_path(), self.directory / "data" / "px4-ca-lint" / "px4_ca_engine")
+        self.assertEqual(user_engine_path(), self.directory / "data" / "actuator-lint" / "actuator_lint_engine")
 
         with self.assertRaises(EngineError) as raised:
             find_engine()
@@ -59,7 +59,7 @@ class FindEngine(unittest.TestCase):
     def test_one_installed_version_is_used(self):
         self.assertEqual(
             versioned_engine_path("v1.17.0"),
-            self.directory / "data" / "px4-ca-lint" / "engines" / "v1.17.0" / "px4_ca_engine",
+            self.directory / "data" / "actuator-lint" / "engines" / "v1.17.0" / "actuator_lint_engine",
         )
         engine = self.install("v1.17.0")
         self.assertEqual(installed_versions(), ["v1.17.0"])
@@ -148,7 +148,7 @@ class FindEngine(unittest.TestCase):
             self.assertEqual(find_engine(str(local)), local)
 
     def test_a_file_that_is_not_executable_is_refused(self):
-        plain = self.directory / "px4_ca_engine"
+        plain = self.directory / "actuator_lint_engine"
         plain.write_text("")
 
         with self.assertRaises(EngineError):
@@ -156,7 +156,7 @@ class FindEngine(unittest.TestCase):
 
 
 class CheckVersion(unittest.TestCase):
-    ENGINE = Path("px4_ca_engine")
+    ENGINE = Path("actuator_lint_engine")
 
     def test_another_release_is_refused(self):
         with self.assertRaises(EngineError) as raised:

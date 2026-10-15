@@ -1,13 +1,13 @@
-### px4-ca-lint report: 1 error(s), 0 warning(s)
+### actuator-lint report: 1 error(s), 0 warning(s)
 
 - Input: `examples/quad_rotor_down.params` (plain format, 15 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 0 (Multirotor), 4 motors, 0 servos
-- Tool: px4-ca-lint 0.4.1
+- Tool: actuator-lint 0.4.1
 
 #### Findings
 
-- **error [CA012](https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA012.md)** (matrix 0): motor1: PX4 takes the thrust as pointing down (positive thrust_z effectiveness), but the rotors that lift this vehicle have to point up. Check the sign of CA_ROTORn_AZ and CA_ROTORn_CT
+- **error [CA012](https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA012.md)** (matrix 0): motor1: PX4 takes the thrust as pointing down (positive thrust_z effectiveness), but the rotors that lift this vehicle have to point up. Check the sign of CA_ROTORn_AZ and CA_ROTORn_CT
 - CA002 was not checked: this PX4 version does not report dropped axes
 
 <details><summary>Matrix 0 (sequential_desaturation, roll/pitch/yaw normalised)</summary>

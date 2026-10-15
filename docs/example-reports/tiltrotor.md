@@ -1,9 +1,9 @@
-### px4-ca-lint report: 0 error(s), 0 warning(s)
+### actuator-lint report: 0 error(s), 0 warning(s)
 
 - Input: `examples/tiltrotor.params` (plain format, 26 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 3 (VTOL Tiltrotor), 4 motors, 6 servos
-- Tool: px4-ca-lint 0.4.1
+- Tool: actuator-lint 0.4.1
 
 #### Findings
 

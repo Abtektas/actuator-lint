@@ -1,7 +1,7 @@
 # Security
 
 Please report security problems privately through
-[GitHub's private vulnerability reporting](https://github.com/Abtektas/px4-ca-lint/security/advisories/new),
+[GitHub's private vulnerability reporting](https://github.com/Abtektas/actuator-lint/security/advisories/new),
 not in a public issue.
 
 The tool reads parameter files and runs a local program on them. It does not

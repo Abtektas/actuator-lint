@@ -14,14 +14,14 @@ Python package and a few lines for the engine of your platform. Then check
 both:
 
 ```
-$ px4-ca-lint --version
-px4-ca-lint 0.4.1
-Copyright (c) 2026, the px4-ca-lint contributors
+$ actuator-lint --version
+actuator-lint 0.4.1
+Copyright (c) 2026, the actuator-lint contributors
 ...
-$ px4-ca-lint engines
+$ actuator-lint engines
 ```
 
-`px4-ca-lint engines` lists the engine that was found and the PX4 version it
+`actuator-lint engines` lists the engine that was found and the PX4 version it
 was built against. The prebuilt engines are for PX4 v1.17.0. A report is only
 valid for the PX4 version of the engine, so the firmware of your vehicle
 should be that version.
@@ -58,7 +58,7 @@ rotor without `CA_ROTORn_PX` and `CA_ROTORn_PY` sits at the centre of gravity.
 ## 3. Run it
 
 ```
-px4-ca-lint my_vehicle.params
+actuator-lint my_vehicle.params
 ```
 
 Look at the first lines before anything else. For the small QGroundControl
@@ -84,7 +84,7 @@ it matters and what to look at:
 ```
 Findings
   error CA006 matrix 0: yaw cannot be controlled independently: ...
-      an axis cannot be controlled independently of the others: https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA006.md
+      an axis cannot be controlled independently of the others: https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA006.md
   1 error(s), 0 warning(s)
 ```
 
@@ -107,7 +107,7 @@ The files in `examples/` are small and each shows one thing. For example a
 quadrotor whose rotors all turn the same way:
 
 ```
-px4-ca-lint examples/quad_same_spin.params
+actuator-lint examples/quad_same_spin.params
 ```
 
 Changing a value in a copy of your own file and looking at what the report
@@ -118,7 +118,7 @@ says is a good way to learn what a parameter does.
 After changing parameters, compare the old and the new file:
 
 ```
-px4-ca-lint diff before.params after.params
+actuator-lint diff before.params after.params
 ```
 
 This lists the parameters that differ, the matrix values that changed and the
@@ -127,7 +127,7 @@ findings that are new or gone.
 ## 7. Share a report
 
 ```
-px4-ca-lint --format markdown my_vehicle.params
+actuator-lint --format markdown my_vehicle.params
 ```
 
 prints a report that can be pasted into a GitHub issue or a forum post, and

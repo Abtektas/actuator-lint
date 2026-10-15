@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from px4_ca_lint.cli import main  # noqa: E402
+from actuator_lint.cli import main  # noqa: E402
 
 PX4_VERSION = "v1.17.0"
 OUTPUT = ROOT / "docs" / "example-reports"
@@ -67,7 +67,7 @@ def run(*arguments: str) -> tuple[int, str]:
 
 def normalised(text: str) -> str:
     """A report without what changes from one tool version to the next."""
-    text = re.sub(r"px4-ca-lint \d+\.\d+\.\d+\S*", "px4-ca-lint VERSION", text)
+    text = re.sub(r"actuator-lint \d+\.\d+\.\d+\S*", "actuator-lint VERSION", text)
     return re.sub(r"/blob/[^/]+/rules/", "/blob/REF/rules/", text)
 
 

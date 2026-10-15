@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 import unittest
 
-from px4_ca_lint.rules import RULES, Options, check
+from actuator_lint.rules import RULES, Options, check
 
 AXES = ("roll", "pitch", "yaw", "thrust_x", "thrust_y", "thrust_z")
 
@@ -55,12 +55,12 @@ class Rules(unittest.TestCase):
     def test_rule_links_follow_the_version(self):
         from unittest import mock
 
-        from px4_ca_lint.rules import rule_url
+        from actuator_lint.rules import rule_url
 
-        with mock.patch("px4_ca_lint.__version__", "0.2.0.dev0"):
+        with mock.patch("actuator_lint.__version__", "0.2.0.dev0"):
             self.assertIn("/blob/main/rules/CA010.md", rule_url("CA010"))
 
-        with mock.patch("px4_ca_lint.__version__", "0.2.0"):
+        with mock.patch("actuator_lint.__version__", "0.2.0"):
             self.assertIn("/blob/v0.2.0/rules/CA010.md", rule_url("CA010"))
 
     def test_healthy_matrix_has_no_findings(self):
@@ -117,7 +117,7 @@ class Rules(unittest.TestCase):
         self.assertEqual(rules(check(engine_result(reported, ca_airframe=0))), [])
 
     def test_ca006_names_the_rows_an_axis_depends_on(self):
-        from px4_ca_lint.rules import dependent_axes
+        from actuator_lint.rules import dependent_axes
 
         # yaw is roll minus pitch; thrust_x is a little of pitch, as with canted rotors
         canted = matrix(
@@ -140,7 +140,7 @@ class Rules(unittest.TestCase):
                       findings[1].message)
 
     def test_ca006_uses_the_limits_of_px4(self):
-        from px4_ca_lint.rules import dependent_axes
+        from actuator_lint.rules import dependent_axes
 
         def yaw_with(part):
             # a yaw row with the given part that is independent of the thrust_z row

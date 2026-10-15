@@ -10,8 +10,8 @@ Attach the file or paste the `CA_*` lines.
 **Command and output**
 
 ```
-px4-ca-lint --version
-px4-ca-lint <file>
+actuator-lint --version
+actuator-lint <file>
 ```
 
 **What you expected**

@@ -12,8 +12,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from px4_ca_lint import DISCLAIMER
-from px4_ca_lint.engine import ENGINE_ENV, EngineError, find_engine
+from actuator_lint import DISCLAIMER
+from actuator_lint.engine import ENGINE_ENV, EngineError, find_engine
 
 ROOT = Path(__file__).parent.parent
 SCRIPT = ROOT / "action" / "run.sh"
@@ -31,9 +31,9 @@ class Run(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         self.work = Path(self.directory.name)
-        tool = self.work / "bin" / "px4-ca-lint"
+        tool = self.work / "bin" / "actuator-lint"
         tool.parent.mkdir()
-        tool.write_text(f'#!/bin/sh\nPYTHONPATH="{ROOT}" exec "{sys.executable}" -m px4_ca_lint "$@"\n')
+        tool.write_text(f'#!/bin/sh\nPYTHONPATH="{ROOT}" exec "{sys.executable}" -m actuator_lint "$@"\n')
         tool.chmod(0o755)
 
         for name in ("fixed_wing", "standard_vtol_pusher_offset", "quad_rotor_down"):
@@ -63,7 +63,7 @@ class Run(unittest.TestCase):
         result, outputs, summary = self.run_action("fixed_wing.params\n\n  with space.params  \r\n")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(outputs, {"files": "2", "failed": "0"})
-        self.assertEqual(summary.count("### px4-ca-lint report"), 2)
+        self.assertEqual(summary.count("### actuator-lint report"), 2)
         self.assertEqual(summary.count(DISCLAIMER), 2)
         self.assertIn("with space.params", summary)
         self.assertIn(DISCLAIMER, result.stdout)
@@ -73,7 +73,7 @@ class Run(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertEqual(outputs, {"files": "4", "failed": "1"})
         self.assertIn("::error file=quad_rotor_down.params::", result.stdout)
-        self.assertEqual(summary.count("### px4-ca-lint report"), 4)
+        self.assertEqual(summary.count("### actuator-lint report"), 4)
 
     def test_fail_on_and_arguments(self):
         result, outputs, _ = self.run_action("standard_vtol_pusher_offset.params", fail_on="warning")

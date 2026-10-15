@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
-# Run px4-ca-lint on the files of the action's input: the text report goes to
+# Run actuator-lint on the files of the action's input: the text report goes to
 # the log, the Markdown report to the job summary. Exits with 1 when a file
 # has findings at or above fail-on or cannot be checked.
 set -uo pipefail
@@ -37,23 +37,23 @@ while IFS= read -r pattern; do
 		IFS="${OLD_IFS}"
 		matched=1
 		files=$((files + 1))
-		echo "::group::px4-ca-lint ${file}"
+		echo "::group::actuator-lint ${file}"
 		status=0
-		px4-ca-lint --fail-on "${FAIL_ON}" ${ARGUMENTS[@]+"${ARGUMENTS[@]}"} -- "${file}" || status=$?
+		actuator-lint --fail-on "${FAIL_ON}" ${ARGUMENTS[@]+"${ARGUMENTS[@]}"} -- "${file}" || status=$?
 		echo "::endgroup::"
 
 		if [ "${status}" -eq 0 ]; then
 			echo "${file}: no findings at or above '${FAIL_ON}'"
 		elif [ "${status}" -eq 1 ]; then
 			failed=$((failed + 1))
-			echo "::error file=${file}::px4-ca-lint: findings at or above '${FAIL_ON}', see the report in the log"
+			echo "::error file=${file}::actuator-lint: findings at or above '${FAIL_ON}', see the report in the log"
 		else
 			failed=$((failed + 1))
-			echo "::error file=${file}::px4-ca-lint could not check this file, see the log"
+			echo "::error file=${file}::actuator-lint could not check this file, see the log"
 		fi
 
 		if [ "${status}" -le 1 ]; then
-			px4-ca-lint --format markdown --fail-on never ${ARGUMENTS[@]+"${ARGUMENTS[@]}"} -- "${file}" >> "${SUMMARY}"
+			actuator-lint --format markdown --fail-on never ${ARGUMENTS[@]+"${ARGUMENTS[@]}"} -- "${file}" >> "${SUMMARY}"
 			echo >> "${SUMMARY}"
 		fi
 	done
@@ -62,12 +62,12 @@ while IFS= read -r pattern; do
 
 	if [ "${matched}" -eq 0 ]; then
 		failed=$((failed + 1))
-		echo "::error::px4-ca-lint: no file matches '${pattern}'"
+		echo "::error::actuator-lint: no file matches '${pattern}'"
 	fi
 done <<< "${INPUT_FILES:-}"
 
 if [ "${files}" -eq 0 ] && [ "${failed}" -eq 0 ]; then
-	echo "::error::px4-ca-lint: the input 'files' is empty"
+	echo "::error::actuator-lint: the input 'files' is empty"
 	failed=1
 fi
 
@@ -76,5 +76,5 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
 	echo "failed=${failed}" >> "${GITHUB_OUTPUT}"
 fi
 
-echo "px4-ca-lint: ${files} file(s) checked, ${failed} failed"
+echo "actuator-lint: ${files} file(s) checked, ${failed} failed"
 [ "${failed}" -eq 0 ]

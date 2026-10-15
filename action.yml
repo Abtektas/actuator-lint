@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
-name: px4-ca-lint
+name: actuator-lint
 description: >-
-  Check PX4 control allocation (CA_*) parameter files with px4-ca-lint.
+  Check PX4 control allocation (CA_*) parameter files with actuator-lint.
   A review aid, not an airworthiness approval; no warranty and no liability.
-author: the px4-ca-lint contributors
+author: the actuator-lint contributors
 branding:
   icon: check-square
   color: blue
@@ -18,13 +18,13 @@ inputs:
     description: Lowest finding level that fails the step (warning, error or never).
     default: error
   arguments:
-    description: Further px4-ca-lint options for every file, for example --ignore CA011.
+    description: Further actuator-lint options for every file, for example --ignore CA011.
     default: ""
   summary:
     description: Whether the reports are added to the job summary (true or false).
     default: "true"
   version:
-    description: Release of px4-ca-lint to install, without the leading v.
+    description: Release of actuator-lint to install, without the leading v.
     default: "0.4.1"
 
 outputs:
@@ -38,10 +38,10 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Install px4-ca-lint
+    - name: Install actuator-lint
       shell: bash
       env:
-        PX4_CA_LINT_VERSION: ${{ inputs.version }}
+        ACTUATOR_LINT_VERSION: ${{ inputs.version }}
         GH_TOKEN: ${{ github.token }}
       run: bash "$GITHUB_ACTION_PATH/action/install.sh"
     - name: Check the parameter files

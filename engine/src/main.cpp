@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 //
-// px4_ca_engine: load control allocation parameters from a file, run PX4's own
+// actuator_lint_engine: load control allocation parameters from a file, run PX4's own
 // actuator effectiveness and control allocation code, and write the resulting
 // matrices as JSON.
 //
-// Usage: px4_ca_engine <params file> <output json>
+// Usage: actuator_lint_engine <params file> <output json>
 //
 // The params file has one "NAME VALUE" pair per line. Parameters that are not
 // in the file keep the defaults compiled into PX4.
@@ -76,7 +76,7 @@ static int loadParams(const char *path, FILE *out)
 	FILE *file = fopen(path, "r");
 
 	if (!file) {
-		fprintf(stderr, "px4_ca_engine: cannot open %s\n", path);
+		fprintf(stderr, "actuator_lint_engine: cannot open %s\n", path);
 		return -1;
 	}
 
@@ -150,15 +150,16 @@ static const char *methodName(AllocationMethod method)
 
 // Printed with the usage, so that the program carries its terms when it is copied without its package
 static const char NOTICE[] =
-	"px4_ca_engine is part of px4-ca-lint (BSD-3-Clause) and contains code of the PX4 Autopilot project,\n"
+	"actuator_lint_engine is part of actuator-lint (BSD-3-Clause) and contains code of the PX4 Autopilot project,\n"
 	"copyright (c) 2012 - 2023, PX4 Development Team, licensed under the BSD 3-Clause license.\n"
 	"Provided \"as is\", without warranty of any kind. The authors and contributors accept no liability\n"
-	"and no responsibility for any use of it or of its results. A review aid, not an airworthiness approval.";
+	"and no responsibility for any use of it or of its results. A review aid, not an airworthiness approval.\n"
+	"PX4 is a trademark of Dronecode Project, Inc.; this project is not affiliated with or endorsed by it.";
 
 int main(int argc, char **argv)
 {
 	if (argc != 3) {
-		fprintf(stderr, "usage: px4_ca_engine <params file> <output json>\n\n%s\n", NOTICE);
+		fprintf(stderr, "usage: actuator_lint_engine <params file> <output json>\n\n%s\n", NOTICE);
 		return EXIT_USAGE;
 	}
 
@@ -169,14 +170,14 @@ int main(int argc, char **argv)
 	FILE *out = fopen(argv[2], "w");
 
 	if (!out) {
-		fprintf(stderr, "px4_ca_engine: cannot write %s\n", argv[2]);
+		fprintf(stderr, "actuator_lint_engine: cannot write %s\n", argv[2]);
 		return EXIT_INPUT;
 	}
 
 	fputs("{\n", out);
 	fprintf(out, "  \"engine_schema\": %d,\n", ENGINE_SCHEMA_VERSION);
-	fprintf(out, "  \"px4_version\": \"%s\",\n", PX4_CA_ENGINE_PX4_VERSION);
-	fprintf(out, "  \"px4_commit\": \"%s\",\n", PX4_CA_ENGINE_PX4_COMMIT);
+	fprintf(out, "  \"px4_version\": \"%s\",\n", ACTUATOR_LINT_ENGINE_PX4_VERSION);
+	fprintf(out, "  \"px4_commit\": \"%s\",\n", ACTUATOR_LINT_ENGINE_PX4_COMMIT);
 
 	const int num_set = loadParams(argv[1], out);
 
@@ -276,7 +277,7 @@ int main(int argc, char **argv)
 		fprintf(out, "    {\n      \"index\": %d,\n      \"num_actuators\": %d,\n", i, num_actuators);
 		fprintf(out, "      \"method\": \"%s\",\n", methodName(methods[i]));
 		fprintf(out, "      \"normalize_rpy\": %s,\n", normalize_rpy[i] ? "true" : "false");
-#if defined(PX4_CA_ENGINE_HAS_DROPPED_AXES)
+#if defined(ACTUATOR_LINT_ENGINE_HAS_DROPPED_AXES)
 		fprintf(out, "      \"dropped_axes_bitmask\": %d,\n", (int)allocation.getDroppedAxes());
 #else
 		// this PX4 version does not report dropped axes

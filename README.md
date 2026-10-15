@@ -1,15 +1,15 @@
-# px4-ca-lint
+# actuator-lint
 
-[![tests](https://github.com/Abtektas/px4-ca-lint/actions/workflows/tests.yml/badge.svg)](https://github.com/Abtektas/px4-ca-lint/actions/workflows/tests.yml)
+[![tests](https://github.com/Abtektas/actuator-lint/actions/workflows/tests.yml/badge.svg)](https://github.com/Abtektas/actuator-lint/actions/workflows/tests.yml)
 
 Check a PX4 control allocation configuration before it flies.
 
-`px4-ca-lint` reads the `CA_*` parameters of a vehicle from a file, runs PX4's
+`actuator-lint` reads the `CA_*` parameters of a vehicle from a file, runs PX4's
 own actuator effectiveness and control allocation code on them, and reports the
 resulting matrices and likely configuration mistakes. No vehicle and no
 simulator are needed.
 
-![px4-ca-lint in a terminal: the report for a standard VTOL whose pusher sits above the centre of gravity, with two warnings](docs/images/terminal.svg)
+![actuator-lint in a terminal: the report for a standard VTOL whose pusher sits above the centre of gravity, with two warnings](docs/images/terminal.svg)
 
 The picture is a shortened copy of a real report; the
 [full one](docs/example-reports/standard_vtol_pusher_offset.md) is in the
@@ -21,6 +21,9 @@ release is tested with the airframe scripts of PX4 and compared with a running
 PX4, see [docs/versioning.md](docs/versioning.md). The version is below 1.0:
 rules and the output format can still change from one minor version to the
 next, and the [changelog](CHANGELOG.md) says when they do.
+
+Releases 0.1.0 to 0.4.1 were published as px4-ca-lint; the
+[changelog](CHANGELOG.md) says what the new name changes for you.
 
 New here? [Getting started](docs/getting-started.md) goes from a vehicle to a
 report in a few minutes, [Reading a report](docs/reading-a-report.md) explains
@@ -42,11 +45,12 @@ show it for known mistakes without installing anything.
 - You decide whether to fly, and you are responsible for the result. The
   authors accept no liability for damage, injury or loss of any kind.
 - This project is not affiliated with or endorsed by the PX4 project or the
-  Dronecode Foundation.
+  Dronecode Foundation. PX4 is a trademark of Dronecode Project, Inc. It is
+  used here only to name the software this tool works with.
 
 These terms are part of the program. Every report ends with them in every
-format, and no option leaves them out. `px4-ca-lint --version` prints them in
-short, `px4-ca-lint license` prints the license, the engine prints them with
+format, and no option leaves them out. `actuator-lint --version` prints them in
+short, `actuator-lint license` prints the license, the engine prints them with
 its usage, and every engine package contains the license texts.
 
 ## Example
@@ -57,7 +61,7 @@ This is the configuration of
 [PX4 issue 28829](https://github.com/PX4/PX4-Autopilot/issues/28829).
 
 ```
-$ px4-ca-lint examples/standard_vtol_pusher_offset.params
+$ actuator-lint examples/standard_vtol_pusher_offset.params
 ...
   Mix: actuator command per unit of setpoint on each axis
   actuator      roll     pitch       yaw  thrust_x  thrust_y  thrust_z
@@ -69,9 +73,9 @@ $ px4-ca-lint examples/standard_vtol_pusher_offset.params
 ...
 Findings
   warning CA010 matrix 0: motor4: thrust_x gain up to 4.00 (limit 2); the output saturates at a thrust_x setpoint of 0.25
-      thrust gain above the limit: https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA010.md
+      thrust gain above the limit: https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA010.md
   warning CA011 matrix 0: motor0, motor1, motor2, motor3: commanded by the thrust_x setpoint without producing thrust_x thrust; a thrust_x setpoint changes their output
-      thrust command to an actuator that produces no thrust on that axis: https://github.com/Abtektas/px4-ca-lint/blob/v0.4.1/rules/CA011.md
+      thrust command to an actuator that produces no thrust on that axis: https://github.com/Abtektas/actuator-lint/blob/v0.4.1/rules/CA011.md
   CA002 was not checked: this PX4 version does not report dropped axes
   0 error(s), 2 warning(s)
 ```
@@ -89,7 +93,7 @@ release 0.4.1.
    provides a suitable Python if the system one is too old:
 
    ```
-   uv tool install https://github.com/Abtektas/px4-ca-lint/releases/download/v0.4.1/px4_ca_lint-0.4.1-py3-none-any.whl
+   uv tool install https://github.com/Abtektas/actuator-lint/releases/download/v0.4.1/actuator_lint-0.4.1-py3-none-any.whl
    ```
 
    Without uv, use [pipx](https://pipx.pypa.io/) with the same URL
@@ -97,35 +101,35 @@ release 0.4.1.
    do not allow `pip install` outside of one):
 
    ```
-   python3 -m venv ~/.venvs/px4-ca-lint
-   ~/.venvs/px4-ca-lint/bin/pip install https://github.com/Abtektas/px4-ca-lint/releases/download/v0.4.1/px4_ca_lint-0.4.1-py3-none-any.whl
-   export PATH="$HOME/.venvs/px4-ca-lint/bin:$PATH"
+   python3 -m venv ~/.venvs/actuator-lint
+   ~/.venvs/actuator-lint/bin/pip install https://github.com/Abtektas/actuator-lint/releases/download/v0.4.1/actuator_lint-0.4.1-py3-none-any.whl
+   export PATH="$HOME/.venvs/actuator-lint/bin:$PATH"
    ```
 
 2. The engine. Choose `linux-x86_64`, `linux-arm64` or `macos-arm64`:
 
    ```
    PLATFORM=linux-x86_64
-   NAME=px4_ca_engine-px4-v1.17.0-schema1-$PLATFORM
-   BASE=https://github.com/Abtektas/px4-ca-lint/releases/download/v0.4.1
+   NAME=actuator_lint_engine-px4-v1.17.0-schema1-$PLATFORM
+   BASE=https://github.com/Abtektas/actuator-lint/releases/download/v0.4.1
    curl -LO $BASE/$NAME.tar.gz
    curl -LO $BASE/SHA256SUMS
    shasum -a 256 --ignore-missing -c SHA256SUMS
    tar -xzf $NAME.tar.gz
-   mkdir -p ~/.local/share/px4-ca-lint
-   cp $NAME/px4_ca_engine ~/.local/share/px4-ca-lint/
+   mkdir -p ~/.local/share/actuator-lint
+   cp $NAME/actuator_lint_engine ~/.local/share/actuator-lint/
    ```
 
    The checksum line must say `OK`. If `shasum` is missing on Linux, use
    `sha256sum --ignore-missing -c SHA256SUMS`. With the GitHub CLI you can also check that
    the file was built by this repository's release workflow:
-   `gh attestation verify $NAME.tar.gz -R Abtektas/px4-ca-lint`.
+   `gh attestation verify $NAME.tar.gz -R Abtektas/actuator-lint`.
 
 3. Try it:
 
    ```
-   px4-ca-lint --version
-   px4-ca-lint your.params
+   actuator-lint --version
+   actuator-lint your.params
    ```
 
 To check parameter files in a GitHub workflow, use the
@@ -143,9 +147,9 @@ result is only valid for the PX4 version the engine was built against, which
 every report names. For another PX4 version or platform, build the engine
 yourself, see [Building the engine](#building-the-engine).
 
-The engine is looked up in this order: `--engine PATH`, `$PX4_CA_ENGINE`,
-`build/engine/px4_ca_engine` in the current directory,
-`~/.local/share/px4-ca-lint/px4_ca_engine` (`$XDG_DATA_HOME` is honoured).
+The engine is looked up in this order: `--engine PATH`, `$ACTUATOR_LINT_ENGINE`,
+`build/engine/actuator_lint_engine` in the current directory,
+`~/.local/share/actuator-lint/actuator_lint_engine` (`$XDG_DATA_HOME` is honoured).
 Since tool version 0.4.0 the engines described in the next section come last.
 
 ### Engines for several PX4 versions
@@ -154,21 +158,21 @@ Since tool version 0.4.0, engines for different PX4 versions can be installed
 side by side, each in a directory named after its PX4 version:
 
 ```
-~/.local/share/px4-ca-lint/engines/v1.17.0/px4_ca_engine
-~/.local/share/px4-ca-lint/engines/v1.18.0/px4_ca_engine
+~/.local/share/actuator-lint/engines/v1.17.0/actuator_lint_engine
+~/.local/share/actuator-lint/engines/v1.18.0/actuator_lint_engine
 ```
 
-`--px4 v1.17.0` (or `$PX4_CA_PX4`) chooses one of them. When only one is
+`--px4 v1.17.0` (or `$ACTUATOR_LINT_PX4`) chooses one of them. When only one is
 installed it is used without the option. When several are installed and none is
 chosen, the tool stops with an error and does not pick one for you.
 
 When `--px4` names a PX4 release, the result comes from an engine built against
 exactly that release or there is no result: an engine built against anything
 else is refused, wherever it was found, also one given with `--engine` or
-`$PX4_CA_ENGINE`. This is a way to make sure a result belongs to the PX4
+`$ACTUATOR_LINT_ENGINE`. This is a way to make sure a result belongs to the PX4
 version you fly.
 
-`px4-ca-lint engines` lists the engines the tool finds, the PX4 version each
+`actuator-lint engines` lists the engines the tool finds, the PX4 version each
 was built against and the one a run without `--engine` and `--px4` uses.
 
 The prebuilt engines are still for PX4 v1.17.0 only. An engine for another
@@ -178,9 +182,9 @@ directory.
 ## Usage
 
 ```
-px4-ca-lint your.params
-px4-ca-lint --format json your.params
-px4-ca-lint --format markdown your.params
+actuator-lint your.params
+actuator-lint --format json your.params
+actuator-lint --format markdown your.params
 ```
 
 The Markdown report is meant for pasting into an issue or pull request.
@@ -188,7 +192,7 @@ The Markdown report is meant for pasting into an issue or pull request.
 To see what a parameter change does, compare two files:
 
 ```
-px4-ca-lint diff before.params after.params
+actuator-lint diff before.params after.params
 ```
 
 This lists the parameters that differ, the matrix values that changed, and the

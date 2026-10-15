@@ -1,9 +1,9 @@
-### px4-ca-lint report: 0 error(s), 0 warning(s)
+### actuator-lint report: 0 error(s), 0 warning(s)
 
 - Input: `examples/tricopter_tilt.params` (plain format, 13 parameters)
 - PX4: `v1.17.0` (`d6f12ad1c4`)
 - Airframe: `CA_AIRFRAME` 8 (MC Tilt), 3 motors, 1 servos
-- Tool: px4-ca-lint 0.4.1
+- Tool: actuator-lint 0.4.1
 
 #### Findings
 

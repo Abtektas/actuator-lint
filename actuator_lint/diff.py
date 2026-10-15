@@ -120,7 +120,7 @@ def _lines(diff: dict, markdown: bool) -> list[str]:
         return ["", f"#### {text}", ""] if markdown else ["", text]
 
     lines = [
-        "### px4-ca-lint diff" if markdown else f"px4-ca-lint {diff['tool_version']} diff",
+        "### actuator-lint diff" if markdown else f"actuator-lint {diff['tool_version']} diff",
         "",
         f"{item}before: {code}{diff['before']['path']}{code} (PX4 {diff['before']['px4']['version']})",
         f"{item}after:  {code}{diff['after']['path']}{code} (PX4 {diff['after']['px4']['version']})",

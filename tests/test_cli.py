@@ -10,8 +10,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from px4_ca_lint.cli import main
-from px4_ca_lint.engine import ENGINE_ENV, PX4_ENV, EngineError, find_engine, versioned_engine_path
+from actuator_lint.cli import main
+from actuator_lint.engine import ENGINE_ENV, PX4_ENV, EngineError, find_engine, versioned_engine_path
 from tests.test_engine import fake_engine
 
 EXAMPLE = str(Path(__file__).parent.parent / "examples" / "standard_vtol.params")
@@ -100,12 +100,12 @@ class EngineChoice(unittest.TestCase):
         self.assertIn("built against PX4 v1.17.0", stderr)
 
     def test_the_single_engine_location_is_checked_against_the_release(self):
-        directory = self.directory / "data" / "px4-ca-lint"
+        directory = self.directory / "data" / "actuator-lint"
         directory.mkdir(parents=True)
         fake_engine(directory, 'echo \'{"engine_schema": 1, "px4_version": "v1.17.0"}\' > "$2"\n')
         code, _, stderr = run("--px4", "v1.18.0", EXAMPLE)
         self.assertEqual(code, 2)
-        self.assertIn(f"the engine '{directory / 'px4_ca_engine'}' was built against PX4 v1.17.0", stderr)
+        self.assertIn(f"the engine '{directory / 'actuator_lint_engine'}' was built against PX4 v1.17.0", stderr)
 
     def test_a_name_that_is_not_a_version(self):
         code, _, stderr = run("--px4", "../v1.17.0", EXAMPLE)
@@ -193,7 +193,7 @@ class WithEngine(unittest.TestCase):
         self.assertEqual(run("--engine", ENGINE, "--ignore", "CA030", example)[0], 0)
 
     def test_integer_parameter_with_a_fraction(self):
-        from px4_ca_lint.engine import run_engine
+        from actuator_lint.engine import run_engine
 
         if "not_integer_parameters" not in run_engine(Path(ENGINE), {"CA_AIRFRAME": "0"}):
             self.skipTest("the engine was built before it refused such values")
@@ -366,7 +366,7 @@ class WithEngine(unittest.TestCase):
         self.assertIn("**warning [CA020](", stdout)
 
     def test_unsupported_airframe(self):
-        path = Path(os.environ.get("TMPDIR", "/tmp")) / "px4-ca-lint-test-unsupported.params"
+        path = Path(os.environ.get("TMPDIR", "/tmp")) / "actuator-lint-test-unsupported.params"
         path.write_text("CA_AIRFRAME 5\n")
         self.addCleanup(path.unlink)
         code, _, stderr = run("--engine", ENGINE, str(path))

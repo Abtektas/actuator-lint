@@ -7,9 +7,9 @@ change to the tool or the engine changes a result.
 
 They need a PX4 checkout and an engine built against it:
 
-    PX4_CA_PX4_DIR=<PX4-Autopilot> PX4_CA_ENGINE=<px4_ca_engine> python3 -m unittest tests.test_golden
+    ACTUATOR_LINT_PX4_DIR=<PX4-Autopilot> ACTUATOR_LINT_ENGINE=<actuator_lint_engine> python3 -m unittest tests.test_golden
 
-Set PX4_CA_UPDATE_GOLDEN=1 to write the stored reports instead of comparing.
+Set ACTUATOR_LINT_UPDATE_GOLDEN=1 to write the stored reports instead of comparing.
 """
 
 import json
@@ -18,14 +18,14 @@ import os
 import unittest
 from pathlib import Path
 
-from px4_ca_lint.engine import EngineError, find_engine, run_engine
-from px4_ca_lint.params import ParamFileError, parse_file
-from px4_ca_lint.report import build_report
-from px4_ca_lint.rules import check
+from actuator_lint.engine import EngineError, find_engine, run_engine
+from actuator_lint.params import ParamFileError, parse_file
+from actuator_lint.report import build_report
+from actuator_lint.rules import check
 
 GOLDEN = Path(__file__).parent / "golden"
-PX4_DIR = os.environ.get("PX4_CA_PX4_DIR")
-UPDATE = os.environ.get("PX4_CA_UPDATE_GOLDEN") == "1"
+PX4_DIR = os.environ.get("ACTUATOR_LINT_PX4_DIR")
+UPDATE = os.environ.get("ACTUATOR_LINT_UPDATE_GOLDEN") == "1"
 AIRFRAME_DIRECTORIES = ("init.d/airframes", "init.d-posix/airframes")
 DIGITS = 4
 TOLERANCE = 1e-3
@@ -124,7 +124,7 @@ def differences(expected, actual, where="") -> list[str]:
     return [] if expected == actual else [f"{where}: {expected!r} != {actual!r}"]
 
 
-@unittest.skipIf(PX4_DIR is None, "PX4_CA_PX4_DIR is not set")
+@unittest.skipIf(PX4_DIR is None, "ACTUATOR_LINT_PX4_DIR is not set")
 class Golden(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
