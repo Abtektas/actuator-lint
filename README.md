@@ -89,22 +89,28 @@ You need the Python package and the engine for your platform. The tool needs
 Python 3.11 or newer and has no Python dependencies. The commands below install
 release 0.4.2.
 
-1. The Python package. With [uv](https://docs.astral.sh/uv/), which also
-   provides a suitable Python if the system one is too old:
+1. The Python package, from the [Python Package Index](https://pypi.org/project/actuator-lint/).
+   With [uv](https://docs.astral.sh/uv/), which also provides a suitable
+   Python if the system one is too old:
 
    ```
-   uv tool install https://github.com/Abtektas/actuator-lint/releases/download/v0.4.2/actuator_lint-0.4.2-py3-none-any.whl
+   uv tool install actuator-lint==0.4.2
    ```
 
-   Without uv, use [pipx](https://pipx.pypa.io/) with the same URL
-   (`pipx install <URL>`), or a virtual environment (most Linux distributions
+   Without uv, use [pipx](https://pipx.pypa.io/) (`pipx install
+   actuator-lint==0.4.2`), or a virtual environment (most Linux distributions
    do not allow `pip install` outside of one):
 
    ```
    python3 -m venv ~/.venvs/actuator-lint
-   ~/.venvs/actuator-lint/bin/pip install https://github.com/Abtektas/actuator-lint/releases/download/v0.4.2/actuator_lint-0.4.2-py3-none-any.whl
+   ~/.venvs/actuator-lint/bin/pip install actuator-lint==0.4.2
    export PATH="$HOME/.venvs/actuator-lint/bin:$PATH"
    ```
+
+   The package index has the files of the
+   [release](https://github.com/Abtektas/actuator-lint/releases/tag/v0.4.2),
+   which you can also install directly, for example
+   `uv tool install https://github.com/Abtektas/actuator-lint/releases/download/v0.4.2/actuator_lint-0.4.2-py3-none-any.whl`.
 
 2. The engine. Choose `linux-x86_64`, `linux-arm64` or `macos-arm64`:
 
