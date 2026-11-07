@@ -120,10 +120,14 @@ against every installed Gazebo and Protobuf version.
 
 ## Prebuilt engines
 
-`engine/package.sh` puts a built engine, this project's license and PX4's
-license into an archive named
-`actuator_lint_engine-px4-<PX4 version>-schema<engine_schema>-<platform>.tar.gz` with a
-SHA-256 checksum. The CI workflow builds these for every push:
+`engine/package.sh` puts a built engine, this project's license (`LICENSE`)
+and PX4's license (`LICENSE-THIRD-PARTY`) into an archive named
+`actuator_lint_engine-<PX4 version>-schema<engine_schema>-<platform>.tar.gz` with a
+SHA-256 checksum. Up to 0.4.2 the archive was named
+`actuator_lint_engine-px4-<PX4 version>-schema<engine_schema>-<platform>.tar.gz` and
+PX4's license was `LICENSE-PX4`; the install steps find the archive of a platform
+in `SHA256SUMS`, so they work with both names. The CI workflow builds these for
+every push:
 
 | Platform | Built on | Needs |
 |---|---|---|

@@ -3,6 +3,27 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions are explained in [docs/versioning.md](docs/versioning.md).
 
+## Unreleased
+
+### Changed
+
+- No file of the project has PX4 in its name any more, because PX4 is a
+  trademark of Dronecode Project, Inc. The checks, the rules, the reports and
+  the JSON fields are unchanged. For you this means:
+  - engine packages are named
+    `actuator_lint_engine-<PX4 version>-schema<engine_schema>-<platform>.tar.gz`
+    instead of `actuator_lint_engine-px4-<PX4 version>-...`,
+  - PX4's license text in an engine package is `LICENSE-THIRD-PARTY` instead
+    of `LICENSE-PX4`; the text and the notices are unchanged,
+  - an engine you have already installed keeps working: the tool looks for
+    the executable `actuator_lint_engine`, whose name has not changed, and
+    not for the name of the package it came from,
+  - the install steps in the README and the GitHub Action choose the package
+    of a platform from `SHA256SUMS`, so they work with the new names and with
+    the packages of 0.4.2 and earlier,
+  - the results for PX4's own airframe scripts moved from
+    `docs/px4-airframes.md` to [docs/airframe-results.md](docs/airframe-results.md).
+
 ## 0.4.2 - 2026-10-15
 
 The first release as actuator-lint. Prebuilt engines contain the control

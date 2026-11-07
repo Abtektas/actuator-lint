@@ -48,7 +48,8 @@ NO_WARRANTY = (
 ENGINE_NOTICE = (
     "The engine (actuator_lint_engine) is built from the control allocation code of PX4, which is "
     "copyright (c) 2012 - 2023, PX4 Development Team and licensed under the BSD 3-Clause license. An engine "
-    "package contains that license text as LICENSE-PX4. This project is not affiliated with or "
+    "package contains that license text as LICENSE-THIRD-PARTY (as LICENSE-PX4 in the packages of "
+    "actuator-lint 0.4.2 and earlier). This project is not affiliated with or "
     "endorsed by the PX4 project or the Dronecode Foundation."
 )
 

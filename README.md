@@ -116,10 +116,10 @@ release 0.4.2.
 
    ```
    PLATFORM=linux-x86_64
-   NAME=actuator_lint_engine-px4-v1.17.0-schema1-$PLATFORM
    BASE=https://github.com/Abtektas/actuator-lint/releases/download/v0.4.2
-   curl -LO $BASE/$NAME.tar.gz
    curl -LO $BASE/SHA256SUMS
+   NAME=$(grep -o "actuator_lint_engine-.*-$PLATFORM" SHA256SUMS)
+   curl -LO $BASE/$NAME.tar.gz
    shasum -a 256 --ignore-missing -c SHA256SUMS
    tar -xzf $NAME.tar.gz
    mkdir -p ~/.local/share/actuator-lint
@@ -316,7 +316,7 @@ After every release, the `install check` workflow follows the install steps
 above, with uv and with a virtual environment, on clean Linux x86_64, Linux
 arm64 and macOS arm64 machines.
 
-[docs/px4-airframes.md](docs/px4-airframes.md) lists the results for PX4's own
+[docs/airframe-results.md](docs/airframe-results.md) lists the results for PX4's own
 airframe scripts.
 
 ## Building the engine

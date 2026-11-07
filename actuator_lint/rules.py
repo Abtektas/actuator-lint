@@ -26,7 +26,7 @@ _ROTOR_GEOMETRY = re.compile(r"^CA_ROTOR(\d+)_(?:PX|PY|PZ|AX|AY|TILT)$")
 # CA022: the CA_AIRFRAME values for which PX4 reads CA_ROTORn_TILT (tiltrotor VTOL, multirotor with tilt)
 _TILT_AIRFRAMES = (3, 8)
 # CA005: the axes a vehicle of each CA_AIRFRAME value cannot be flown without. Every airframe script
-# of PX4 v1.17.0 that PX4 can allocate controls them, see docs/px4-airframes.md.
+# of PX4 v1.17.0 that PX4 can allocate controls them, see docs/airframe-results.md.
 _HOVER_AXES = ("roll", "pitch", "yaw", "thrust_z")
 _NEEDED_AXES = {
     0: _HOVER_AXES,  # multirotor

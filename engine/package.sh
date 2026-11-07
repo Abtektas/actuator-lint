@@ -5,8 +5,11 @@
 #
 # usage: engine/package.sh <actuator_lint_engine> <path to PX4-Autopilot> <platform, e.g. linux-x86_64> <output directory>
 #
-# The archive contains PX4's license text, because the engine contains compiled
-# PX4 code.
+# The archive contains PX4's license text as LICENSE-THIRD-PARTY, because the
+# engine contains compiled PX4 code. Packages of actuator-lint 0.4.2 and earlier
+# were named actuator_lint_engine-px4-<PX4 version>-... and had that text in
+# LICENSE-PX4; the install steps find a package by its platform, so they accept
+# both names.
 set -euo pipefail
 
 if [ $# -ne 4 ]; then
@@ -40,11 +43,11 @@ case "${PX4_VERSION}" in
 	;;
 esac
 
-NAME="actuator_lint_engine-px4-${PX4_VERSION}-schema${SCHEMA}-${PLATFORM}"
+NAME="actuator_lint_engine-${PX4_VERSION}-schema${SCHEMA}-${PLATFORM}"
 mkdir -p "${OUT}" "${WORK}/${NAME}"
 cp "${ENGINE}" "${WORK}/${NAME}/actuator_lint_engine"
 cp "${HERE}/../LICENSE" "${WORK}/${NAME}/LICENSE"
-cp "${PX4_DIR}/LICENSE" "${WORK}/${NAME}/LICENSE-PX4"
+cp "${PX4_DIR}/LICENSE" "${WORK}/${NAME}/LICENSE-THIRD-PARTY"
 
 {
 	echo "actuator_lint_engine for actuator-lint"
@@ -54,7 +57,8 @@ cp "${PX4_DIR}/LICENSE" "${WORK}/${NAME}/LICENSE-PX4"
 	echo
 	echo "This program contains compiled code of the PX4 Autopilot project"
 	echo "(https://github.com/PX4/PX4-Autopilot), copyright PX4 Development Team,"
-	echo "licensed under the BSD 3-Clause license. Its license text is in LICENSE-PX4."
+	echo "licensed under the BSD 3-Clause license. Its license text is in"
+	echo "LICENSE-THIRD-PARTY."
 	echo "The actuator-lint code is licensed as stated in LICENSE."
 	echo
 	echo "Provided \"as is\", without warranty of any kind. The authors and contributors"
