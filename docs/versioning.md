@@ -36,6 +36,7 @@ release on the Python Package Index.
 | 0.4.0 | 2026-10-13 | v1.17.0 | 1 |
 | 0.4.1 | 2026-10-15 | v1.17.0 | 1 |
 | 0.4.2 | 2026-10-15 | v1.17.0 | 1 |
+| 0.4.3 | 2026-11-07 | v1.17.0 | 1 |
 
 ## 2. The engine output (`engine_schema`)
 

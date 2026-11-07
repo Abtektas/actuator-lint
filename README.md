@@ -73,9 +73,9 @@ $ actuator-lint examples/standard_vtol_pusher_offset.params
 ...
 Findings
   warning CA010 matrix 0: motor4: thrust_x gain up to 4.00 (limit 2); the output saturates at a thrust_x setpoint of 0.25
-      thrust gain above the limit: https://github.com/Abtektas/actuator-lint/blob/v0.4.2/rules/CA010.md
+      thrust gain above the limit: https://github.com/Abtektas/actuator-lint/blob/v0.4.3/rules/CA010.md
   warning CA011 matrix 0: motor0, motor1, motor2, motor3: commanded by the thrust_x setpoint without producing thrust_x thrust; a thrust_x setpoint changes their output
-      thrust command to an actuator that produces no thrust on that axis: https://github.com/Abtektas/actuator-lint/blob/v0.4.2/rules/CA011.md
+      thrust command to an actuator that produces no thrust on that axis: https://github.com/Abtektas/actuator-lint/blob/v0.4.3/rules/CA011.md
   CA002 was not checked: this PX4 version does not report dropped axes
   0 error(s), 2 warning(s)
 ```
@@ -87,36 +87,36 @@ findings.
 
 You need the Python package and the engine for your platform. The tool needs
 Python 3.11 or newer and has no Python dependencies. The commands below install
-release 0.4.2.
+release 0.4.3.
 
 1. The Python package, from the [Python Package Index](https://pypi.org/project/actuator-lint/).
    With [uv](https://docs.astral.sh/uv/), which also provides a suitable
    Python if the system one is too old:
 
    ```
-   uv tool install actuator-lint==0.4.2
+   uv tool install actuator-lint==0.4.3
    ```
 
    Without uv, use [pipx](https://pipx.pypa.io/) (`pipx install
-   actuator-lint==0.4.2`), or a virtual environment (most Linux distributions
+   actuator-lint==0.4.3`), or a virtual environment (most Linux distributions
    do not allow `pip install` outside of one):
 
    ```
    python3 -m venv ~/.venvs/actuator-lint
-   ~/.venvs/actuator-lint/bin/pip install actuator-lint==0.4.2
+   ~/.venvs/actuator-lint/bin/pip install actuator-lint==0.4.3
    export PATH="$HOME/.venvs/actuator-lint/bin:$PATH"
    ```
 
    The package index has the files of the
-   [release](https://github.com/Abtektas/actuator-lint/releases/tag/v0.4.2),
+   [release](https://github.com/Abtektas/actuator-lint/releases/tag/v0.4.3),
    which you can also install directly, for example
-   `uv tool install https://github.com/Abtektas/actuator-lint/releases/download/v0.4.2/actuator_lint-0.4.2-py3-none-any.whl`.
+   `uv tool install https://github.com/Abtektas/actuator-lint/releases/download/v0.4.3/actuator_lint-0.4.3-py3-none-any.whl`.
 
 2. The engine. Choose `linux-x86_64`, `linux-arm64` or `macos-arm64`:
 
    ```
    PLATFORM=linux-x86_64
-   BASE=https://github.com/Abtektas/actuator-lint/releases/download/v0.4.2
+   BASE=https://github.com/Abtektas/actuator-lint/releases/download/v0.4.3
    curl -LO $BASE/SHA256SUMS
    NAME=$(grep -o "actuator_lint_engine-.*-$PLATFORM" SHA256SUMS)
    curl -LO $BASE/$NAME.tar.gz
