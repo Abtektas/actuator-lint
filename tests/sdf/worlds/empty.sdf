@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!-- SPDX-License-Identifier: BSD-3-Clause -->
+<!-- A world without systems of its own: gz-sim loads server.config. -->
+<sdf version="1.9">
+  <world name="empty">
+    <include><uri>model://quad</uri></include>
+  </world>
+</sdf>

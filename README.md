@@ -221,6 +221,26 @@ script, files it sources (such as `rc.fw_defaults`) are read when the script is
 inside a PX4 `ROMFS` directory; `if` blocks are not evaluated. The report says
 so when either applies.
 
+### Gazebo models
+
+For a vehicle flown in PX4's gz simulation (Gazebo Harmonic and later), the
+model and the world can be checked against the parameter file as well:
+
+```
+actuator-lint --input-format airframe --sdf models/my_quad --world worlds/my_world.sdf airframes/4001_gz_my_quad
+```
+
+`--sdf` takes a model directory or an `.sdf` file; `model://` includes are
+looked up next to the model and in `GZ_SIM_RESOURCE_PATH`. `--world` is
+optional and only needed for [SDF001](rules/SDF001.md). The model is read by
+the tool itself, with no Gazebo installation; a model that includes another
+one from a server (Gazebo Fuel) is reported as not checked. The rules
+SDF001 to SDF020 below find the mistakes that make a custom model fail in
+simulation: missing sensor systems or sensors, a rotor that pushes sideways
+or cannot reach its speed, motors that get no commands, too little thrust,
+and motors that do not match the control allocation parameters. Gazebo
+Classic models are not supported.
+
 Supported `CA_AIRFRAME` values: 0 (multirotor), 1 (fixed-wing), 2 (standard
 VTOL), 3 (tiltrotor VTOL), 4 (tailsitter VTOL) and 8 (multirotor with tilt).
 Other values give an error, not a report.
@@ -261,11 +281,18 @@ the matrices and are not part of it.
 | [CA022](rules/CA022.md) | warning | a rotor is assigned to a tilt servo that does not exist |
 | [CA030](rules/CA030.md) | error | a line of the parameter file could not be used |
 | [CA031](rules/CA031.md) | warning | a control allocation parameter does not exist in this PX4 version |
+| [SDF001](rules/SDF001.md) | error | the world loads its own systems but not one that a sensor of the model needs |
+| [SDF002](rules/SDF002.md) | error or warning | a sensor that PX4 reads in simulation is missing from `base_link` |
+| [SDF010](rules/SDF010.md) | error | a rotor pushes along another axis than the one it spins about |
+| [SDF011](rules/SDF011.md) | error | a rotor joint cannot reach full speed |
+| [SDF012](rules/SDF012.md) | error | a motor gets no speed commands |
+| [SDF013](rules/SDF013.md) | error or warning | the rotors cannot lift the model |
+| [SDF020](rules/SDF020.md) | error or warning | the motors of the model do not match the control allocation rotors |
 
 CA002 needs a PX4 version newer than release/1.18; with the prebuilt engines
 the report says that it was not checked, and CA006 applies the same test.
 CA002 and CA006 are errors for an axis the vehicle type needs and warnings for
-one it does not need.
+one it does not need. The SDF rules run only with `--sdf`.
 
 Options: `--ignore CA011,CA020` skips rules, `--max-thrust-gain` sets the limit
 of CA010, `--fail-on warning|error|never` chooses what gives exit code 1 (the
@@ -293,14 +320,17 @@ report.
 | End-to-end tests | the examples give the expected findings | the engine |
 | Golden tests | the reports for all airframe scripts shipped with PX4 v1.17.0 have not changed | the engine and a PX4 checkout |
 | SITL cross-check | the engine's effectiveness matrices equal the ones of a running PX4 (`control_allocator status`) | the engine and a PX4 SITL build |
+| SDF tests | each SDF rule fires on a broken model and not on the working one; no error on PX4's own gz models; the model reader gives the poses and joint axes of libsdformat | Python only; a PX4 checkout with its gz models; the `sdformat14` Python bindings |
 
 ```
 python3 -m unittest discover -s tests -t .
 ```
 
 Tests whose requirements are missing are skipped. See the comments at the top
-of `tests/test_golden.py` and `tests/test_sitl.py` for the environment
-variables. `control_allocator status` does not print the mix matrix, so the
+of `tests/test_golden.py`, `tests/test_sitl.py` and `tests/test_sdf.py` for the
+environment variables. Each broken model in `tests/test_sdf.py` stands for a
+model that was flown in PX4's gz simulation (PX4 main 91516d4c44, Gazebo
+Harmonic 8.15.0) and failed there as the rule document says. `control_allocator status` does not print the mix matrix, so the
 cross-check compares the effectiveness matrices only; the mix matrix comes from
 the same PX4 class in both cases. PX4 has no SIH airframe with tilt servos, so
 for the tiltrotor and the multirotor with tilt the parameters of an example are

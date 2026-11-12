@@ -7,7 +7,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import diff, legal
+from . import diff, legal, sdf
 from . import report as single
 from .engine import (
     ENGINE_ENV,
@@ -127,6 +127,17 @@ def _check_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("file", help="parameter file (plain, PX4 airframe script or QGroundControl export)")
     _add_common_options(parser, "lowest finding level that gives exit code 1 (default: error)")
+    parser.add_argument(
+        "--sdf",
+        metavar="MODEL",
+        help="also check a Gazebo (gz-sim) model against the parameter file: a model directory or an "
+        ".sdf file (rules SDF001 to SDF020)",
+    )
+    parser.add_argument(
+        "--world",
+        metavar="FILE",
+        help="the world file the model is flown in, for rule SDF001 (needs --sdf)",
+    )
     return parser
 
 
@@ -185,7 +196,16 @@ def _analyse(path: str, args: argparse.Namespace) -> dict:
     check_px4_version(px4, engine, engine_result)
     options = Options(max_thrust_gain=args.max_thrust_gain, ignore=args.ignore)
     checked = check(engine_result, options, param_file.params, param_file.unread)
-    return single.build_report(param_file, engine_result, checked)
+    model = None
+
+    if getattr(args, "sdf", None):
+        model_result, model = sdf.check(args.sdf, args.world, param_file.params)
+        checked.findings += [finding for finding in model_result.findings if finding.rule not in args.ignore]
+        checked.not_checked.update(
+            {rule: reason for rule, reason in model_result.not_checked.items() if rule not in args.ignore}
+        )
+
+    return single.build_report(param_file, engine_result, checked, model)
 
 
 def _write(text: str, output: str | None) -> None:
@@ -222,14 +242,19 @@ def main(argv: list[str] | None = None) -> int:
             findings = result["findings"]["new"]
 
         else:
-            args = _check_parser().parse_args(argv)
+            parser = _check_parser()
+            args = parser.parse_args(argv)
+
+            if args.world and not args.sdf:
+                parser.error("--world needs --sdf")
+
             result = _analyse(args.file, args)
             text = single.RENDERERS[args.format](result)
             findings = result["findings"]
 
         _write(text, args.output)
 
-    except (ParamFileError, EngineError) as error:
+    except (ParamFileError, EngineError, sdf.SdfError) as error:
         print(f"actuator-lint: error: {error}", file=sys.stderr)
         return EXIT_ERROR
 
