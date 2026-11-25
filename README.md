@@ -73,9 +73,9 @@ $ actuator-lint examples/standard_vtol_pusher_offset.params
 ...
 Findings
   warning CA010 matrix 0: motor4: thrust_x gain up to 4.00 (limit 2); the output saturates at a thrust_x setpoint of 0.25
-      thrust gain above the limit: https://github.com/Abtektas/actuator-lint/blob/v0.4.3/rules/CA010.md
+      thrust gain above the limit: https://github.com/Abtektas/actuator-lint/blob/v0.5.0/rules/CA010.md
   warning CA011 matrix 0: motor0, motor1, motor2, motor3: commanded by the thrust_x setpoint without producing thrust_x thrust; a thrust_x setpoint changes their output
-      thrust command to an actuator that produces no thrust on that axis: https://github.com/Abtektas/actuator-lint/blob/v0.4.3/rules/CA011.md
+      thrust command to an actuator that produces no thrust on that axis: https://github.com/Abtektas/actuator-lint/blob/v0.5.0/rules/CA011.md
   CA002 was not checked: this PX4 version does not report dropped axes
   0 error(s), 2 warning(s)
 ```
@@ -87,44 +87,50 @@ findings.
 
 You need the Python package and the engine for your platform. The tool needs
 Python 3.11 or newer and has no Python dependencies. The commands below install
-release 0.4.3.
+release 0.5.0.
 
 1. The Python package, from the [Python Package Index](https://pypi.org/project/actuator-lint/).
    With [uv](https://docs.astral.sh/uv/), which also provides a suitable
    Python if the system one is too old:
 
    ```
-   uv tool install actuator-lint==0.4.3
+   uv tool install actuator-lint==0.5.0
    ```
 
    Without uv, use [pipx](https://pipx.pypa.io/) (`pipx install
-   actuator-lint==0.4.3`), or a virtual environment (most Linux distributions
+   actuator-lint==0.5.0`), or a virtual environment (most Linux distributions
    do not allow `pip install` outside of one):
 
    ```
    python3 -m venv ~/.venvs/actuator-lint
-   ~/.venvs/actuator-lint/bin/pip install actuator-lint==0.4.3
+   ~/.venvs/actuator-lint/bin/pip install actuator-lint==0.5.0
    export PATH="$HOME/.venvs/actuator-lint/bin:$PATH"
    ```
 
    The package index has the files of the
-   [release](https://github.com/Abtektas/actuator-lint/releases/tag/v0.4.3),
+   [release](https://github.com/Abtektas/actuator-lint/releases/tag/v0.5.0),
    which you can also install directly, for example
-   `uv tool install https://github.com/Abtektas/actuator-lint/releases/download/v0.4.3/actuator_lint-0.4.3-py3-none-any.whl`.
+   `uv tool install https://github.com/Abtektas/actuator-lint/releases/download/v0.5.0/actuator_lint-0.5.0-py3-none-any.whl`.
 
-2. The engine. Choose `linux-x86_64`, `linux-arm64` or `macos-arm64`:
+2. The engine. Choose `linux-x86_64`, `linux-arm64` or `macos-arm64`, and the
+   PX4 version you fly, `v1.18.0` or `v1.17.0`:
 
    ```
    PLATFORM=linux-x86_64
-   BASE=https://github.com/Abtektas/actuator-lint/releases/download/v0.4.3
+   PX4=v1.18.0
+   BASE=https://github.com/Abtektas/actuator-lint/releases/download/v0.5.0
    curl -LO $BASE/SHA256SUMS
-   NAME=$(grep -o "actuator_lint_engine-.*-$PLATFORM" SHA256SUMS)
+   NAME=$(grep -o "actuator_lint_engine-.*$PX4-schema[0-9]*-$PLATFORM" SHA256SUMS)
    curl -LO $BASE/$NAME.tar.gz
    shasum -a 256 --ignore-missing -c SHA256SUMS
    tar -xzf $NAME.tar.gz
-   mkdir -p ~/.local/share/actuator-lint
-   cp $NAME/actuator_lint_engine ~/.local/share/actuator-lint/
+   mkdir -p ~/.local/share/actuator-lint/engines/$PX4
+   cp $NAME/actuator_lint_engine ~/.local/share/actuator-lint/engines/$PX4/
    ```
+
+   Release 0.5.0 has an engine for each of the two PX4 versions; 0.4.3 and
+   earlier have engines for `v1.17.0` only. To check against both, repeat the
+   step with the other `PX4`; see [Engines for several PX4 versions](#engines-for-several-px4-versions).
 
    The checksum line must say `OK`. If `shasum` is missing on Linux, use
    `sha256sum --ignore-missing -c SHA256SUMS`. With the GitHub CLI you can also check that
@@ -148,8 +154,8 @@ Requirements of the prebuilt engines:
 | `linux-x86_64`, `linux-arm64` | glibc 2.38 or newer, for example Ubuntu 24.04. Ubuntu 22.04 and Debian 12 are too old. |
 | `macos-arm64` | macOS 14 or newer on Apple silicon. Download with `curl` as shown; a file downloaded with a browser is blocked by macOS until you remove its quarantine attribute. |
 
-The prebuilt engines contain the control allocation code of **PX4 v1.17.0**. A
-result is only valid for the PX4 version the engine was built against, which
+The prebuilt engines contain the control allocation code of **PX4 v1.18.0** or
+**PX4 v1.17.0**, one engine for each. A result is only valid for the PX4 version the engine was built against, which
 every report names. For another PX4 version or platform, build the engine
 yourself, see [Building the engine](#building-the-engine).
 
@@ -181,7 +187,7 @@ version you fly.
 `actuator-lint engines` lists the engines the tool finds, the PX4 version each
 was built against and the one a run without `--engine` and `--px4` uses.
 
-The prebuilt engines are still for PX4 v1.17.0 only. An engine for another
+The prebuilt engines are for PX4 v1.18.0 and v1.17.0. An engine for another
 version is one you [build yourself](#building-the-engine) and copy into such a
 directory.
 
@@ -318,7 +324,7 @@ report.
 |---|---|---|
 | Unit tests | parsers, rules and reports behave as documented | Python only |
 | End-to-end tests | the examples give the expected findings | the engine |
-| Golden tests | the reports for all airframe scripts shipped with PX4 v1.17.0 have not changed | the engine and a PX4 checkout |
+| Golden tests | the reports for all airframe scripts shipped with PX4 v1.17.0 and v1.18.0 have not changed | the engine and a PX4 checkout |
 | SITL cross-check | the engine's effectiveness matrices equal the ones of a running PX4 (`control_allocator status`) | the engine and a PX4 SITL build |
 | SDF tests | each SDF rule fires on a broken model and not on the working one; no error on PX4's own gz models; the model reader gives the poses and joint axes of libsdformat | Python only; a PX4 checkout with its gz models; the `sdformat14` Python bindings |
 

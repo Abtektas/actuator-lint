@@ -26,39 +26,51 @@ try:
 except EngineError:
     ENGINE = None
 
-# how the install steps choose the package of a platform in SHA256SUMS
-LOOKUP = 'grep -o "actuator_lint_engine-.*-'
+# how the install steps choose the package of a PX4 version and a platform in SHA256SUMS
+LOOKUP = 'grep -o "actuator_lint_engine-.*${PX4}-schema[0-9]*-${PLATFORM}" SHA256SUMS'
 INSTALL_STEPS = ("README.md", "action/install.sh", ".github/workflows/install-check.yml")
 
 PLATFORMS = ("linux-x86_64", "linux-arm64", "macos-arm64")
 CHECKSUM = "0" * 64
 
 
-def checksums(name: str) -> str:
-    """A SHA256SUMS file as the release workflow writes it, for packages named like name."""
+def checksums(*names: str) -> str:
+    """A SHA256SUMS file as the release workflow writes it, for packages named like names."""
     lines = [f"{CHECKSUM}  actuator_lint-9.9.9-py3-none-any.whl", f"{CHECKSUM}  actuator_lint-9.9.9.tar.gz"]
-    lines += [f"{CHECKSUM}  {name.format(platform=platform)}.tar.gz" for platform in PLATFORMS]
+    lines += [f"{CHECKSUM}  {name.format(platform=platform)}.tar.gz" for name in names for platform in PLATFORMS]
     return "\n".join(lines) + "\n"
+
+
+def lookup(text: str, px4: str, platform: str) -> list[str]:
+    """What LOOKUP prints: grep reads the dots of the version as any character."""
+    pattern = "actuator_lint_engine-.*" + px4.replace(".", "[^\\n]") + "-schema[0-9]*-" + re.escape(platform)
+    return re.findall(pattern, text)
 
 
 class Names(unittest.TestCase):
     def test_the_install_steps_find_old_and_new_packages(self):
         for path in INSTALL_STEPS:
             with self.subTest(path=path):
-                self.assertIn(LOOKUP, (ROOT / path).read_text(encoding="utf-8"))
+                text = (ROOT / path).read_text(encoding="utf-8").replace("$PX4", "${PX4}").replace("$PLATFORM", "${PLATFORM}")
+                self.assertIn(LOOKUP, text)
 
-        for name in (
-            "actuator_lint_engine-v1.18.0-schema1-{platform}",
-            "actuator_lint_engine-v1.18.0-rc1-schema1-{platform}",
+        for px4, names in (
+            # one release with engines for two PX4 versions, since 0.5.0
+            ("v1.18.0", ("actuator_lint_engine-v1.17.0-schema1-{platform}", "actuator_lint_engine-v1.18.0-schema1-{platform}")),
+            ("v1.17.0", ("actuator_lint_engine-v1.17.0-schema1-{platform}", "actuator_lint_engine-v1.18.0-schema1-{platform}")),
+            # 0.4.3
+            ("v1.17.0", ("actuator_lint_engine-v1.17.0-schema1-{platform}",)),
+            # a release candidate is not the release
+            ("v1.18.0", ("actuator_lint_engine-v1.18.0-rc1-schema1-{platform}", "actuator_lint_engine-v1.18.0-schema1-{platform}")),
             # 0.4.2 and earlier
-            "actuator_lint_engine-px4-v1.17.0-schema1-{platform}",
+            ("v1.17.0", ("actuator_lint_engine-px4-v1.17.0-schema1-{platform}",)),
         ):
-            text = checksums(name)
+            text = checksums(*names)
+            wanted = [name for name in names if f"-{px4}-schema" in name]
 
             for platform in PLATFORMS:
-                with self.subTest(name=name, platform=platform):
-                    found = re.findall(rf"actuator_lint_engine-.*-{re.escape(platform)}", text)
-                    self.assertEqual(found, [name.format(platform=platform)])
+                with self.subTest(px4=px4, names=names, platform=platform):
+                    self.assertEqual(lookup(text, px4, platform), [name.format(platform=platform) for name in wanted])
 
     def test_package_sh_names_the_package_and_the_license_without_px4(self):
         script = (ROOT / "engine" / "package.sh").read_text(encoding="utf-8")

@@ -15,14 +15,14 @@ both:
 
 ```
 $ actuator-lint --version
-actuator-lint 0.4.3
+actuator-lint 0.5.0
 Copyright (c) 2026, the actuator-lint contributors
 ...
 $ actuator-lint engines
 ```
 
 `actuator-lint engines` lists the engine that was found and the PX4 version it
-was built against. The prebuilt engines are for PX4 v1.17.0. A report is only
+was built against. The prebuilt engines are for PX4 v1.18.0 and v1.17.0. A report is only
 valid for the PX4 version of the engine, so the firmware of your vehicle
 should be that version.
 
@@ -84,7 +84,7 @@ it matters and what to look at:
 ```
 Findings
   error CA006 matrix 0: yaw cannot be controlled independently: ...
-      an axis cannot be controlled independently of the others: https://github.com/Abtektas/actuator-lint/blob/v0.4.3/rules/CA006.md
+      an axis cannot be controlled independently of the others: https://github.com/Abtektas/actuator-lint/blob/v0.5.0/rules/CA006.md
   1 error(s), 0 warning(s)
 ```
 

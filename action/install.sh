@@ -14,6 +14,20 @@ case "${VERSION}" in
 	;;
 esac
 
+# empty: the newest PX4 release the actuator-lint release has an engine for
+PX4="${ACTUATOR_LINT_PX4_INPUT:-}"
+case "${PX4}" in
+'') ;;
+v*[!0-9.]* | v | v.* | *..* | *.)
+	echo "::error::px4 '${PX4}' is not a PX4 release such as v1.18.0"
+	exit 2
+	;;
+v[0-9]*.[0-9]*.[0-9]*) ;;
+*)
+	echo "::error::px4 '${PX4}' is not a PX4 release such as v1.18.0"
+	exit 2
+	;;
+esac
 case "${RUNNER_OS}-${RUNNER_ARCH}" in
 Linux-X64) PLATFORM=linux-x86_64 ;;
 Linux-ARM64) PLATFORM=linux-arm64 ;;
@@ -39,7 +53,20 @@ python3 -m venv "${HOME_DIR}/venv"
 	"${BASE}/actuator_lint-${VERSION}-py3-none-any.whl"
 
 curl -fsSLO "${BASE}/SHA256SUMS"
-NAME="$(grep -o "actuator_lint_engine-.*-${PLATFORM}" SHA256SUMS)"
+if [ -z "${PX4}" ]; then
+	PX4="$(python3 - "${PLATFORM}" <<'EOF'
+import re, sys
+found = re.findall(r"actuator_lint_engine-(?:px4-)?(v[0-9]+\.[0-9]+\.[0-9]+)-schema[0-9]+-" + re.escape(sys.argv[1]) + r"\b", open("SHA256SUMS").read())
+print(max(found, key=lambda v: tuple(int(n) for n in v[1:].split("."))) if found else "")
+EOF
+)"
+fi
+NAME="$(grep -o "actuator_lint_engine-.*${PX4}-schema[0-9]*-${PLATFORM}" SHA256SUMS || true)"
+if [ -z "${PX4}" ] || [ -z "${NAME}" ]; then
+	echo "::error::release ${VERSION} of actuator-lint has no engine for PX4 ${PX4:-(any)} on ${PLATFORM}; it has:"
+	grep -o "actuator_lint_engine-[^ ]*" SHA256SUMS | sed 's/\.tar\.gz$//' >&2
+	exit 2
+fi
 curl -fsSLO "${BASE}/${NAME}.tar.gz"
 shasum -a 256 --ignore-missing -c SHA256SUMS
 # the file was built by the release workflow of the actuator-lint repository
@@ -50,4 +77,6 @@ cp "${NAME}/actuator_lint_engine" "${HOME_DIR}/engine/"
 
 echo "${HOME_DIR}/venv/bin" >> "${GITHUB_PATH}"
 echo "ACTUATOR_LINT_ENGINE=${HOME_DIR}/engine/actuator_lint_engine" >> "${GITHUB_ENV}"
-ACTUATOR_LINT_ENGINE="${HOME_DIR}/engine/actuator_lint_engine" "${HOME_DIR}/venv/bin/actuator-lint" engines
+# every run then refuses an engine built against another PX4 version
+echo "ACTUATOR_LINT_PX4=${PX4}" >> "${GITHUB_ENV}"
+ACTUATOR_LINT_ENGINE="${HOME_DIR}/engine/actuator_lint_engine" ACTUATOR_LINT_PX4="${PX4}" "${HOME_DIR}/venv/bin/actuator-lint" engines

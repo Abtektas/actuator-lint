@@ -11,20 +11,21 @@ on:
       version:
         description: Release to check, without the leading v
         required: true
-        default: "0.4.3"
+        default: "0.5.0"
 
 permissions:
   contents: read
 
 jobs:
   install:
-    name: ${{ matrix.platform }} on ${{ matrix.runner }}, ${{ matrix.installer }}
+    name: ${{ matrix.platform }} on ${{ matrix.runner }}, ${{ matrix.installer }}, PX4 ${{ matrix.px4 }}
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
         platform: [linux-x86_64, linux-arm64, macos-arm64]
         installer: [uv, venv]
+        px4: [v1.17.0, v1.18.0]
         include:
           - platform: linux-x86_64
             runner: ubuntu-24.04
@@ -35,6 +36,7 @@ jobs:
     env:
       VERSION: ${{ inputs.version || github.event.release.tag_name }}
       PLATFORM: ${{ matrix.platform }}
+      PX4: ${{ matrix.px4 }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Version without the leading v
@@ -61,13 +63,13 @@ jobs:
         run: |
           BASE="https://github.com/Abtektas/actuator-lint/releases/download/v${VERSION}"
           curl -fLO "$BASE/SHA256SUMS"
-          NAME="$(grep -o "actuator_lint_engine-.*-${PLATFORM}" SHA256SUMS)"
+          NAME="$(grep -o "actuator_lint_engine-.*${PX4}-schema[0-9]*-${PLATFORM}" SHA256SUMS)"
           curl -fLO "$BASE/$NAME.tar.gz"
           shasum -a 256 --ignore-missing -c SHA256SUMS
           gh attestation verify "$NAME.tar.gz" -R Abtektas/actuator-lint
           tar -xzf "$NAME.tar.gz"
-          mkdir -p ~/.local/share/actuator-lint
-          cp "$NAME/actuator_lint_engine" ~/.local/share/actuator-lint/
+          mkdir -p ~/.local/share/actuator-lint/engines/"$PX4"
+          cp "$NAME/actuator_lint_engine" ~/.local/share/actuator-lint/engines/"$PX4"/
       - name: Run the tool
         run: |
           actuator-lint --version
@@ -77,8 +79,9 @@ jobs:
         run: |
           actuator-lint --format json examples/standard_vtol_pusher_offset.params > report.json
           python3 - <<'EOF'
-          import json
+          import json, os
           report = json.load(open("report.json"))
+          assert report["px4"]["version"] == os.environ["PX4"], report["px4"]
           rules = sorted(finding["rule"] for finding in report["findings"])
           gain = report["matrices"][0]["mix"][4]["thrust_x"]
           print(report["px4"]["version"], rules, gain)

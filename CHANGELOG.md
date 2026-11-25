@@ -3,7 +3,10 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions are explained in [docs/versioning.md](docs/versioning.md).
 
-## Unreleased
+## 0.5.0 - 2026-11-25
+
+Prebuilt engines contain the control allocation code of PX4 v1.18.0 and of
+PX4 v1.17.0 (`engine_schema` 1); 0.4.3 had engines for v1.17.0 only.
 
 ### Added
 
@@ -17,6 +20,19 @@ Versions are explained in [docs/versioning.md](docs/versioning.md).
   read by the tool itself; nothing new needs to be installed. On the gz models
   and airframes of PX4 v1.17.0, v1.18.0-rc1 and main (91516d4c44) the rules
   give no error and no warning. Reports without `--sdf` are unchanged.
+- Prebuilt engines for PX4 v1.18.0, next to those for v1.17.0, and stored
+  golden reports for all its airframe scripts. Compared with v1.17.0 no result
+  of a script both releases ship changed; see docs/airframe-results.md.
+- GitHub Action: input `px4` chooses the PX4 version of the engine. Every run
+  then refuses an engine built against another version.
+
+### Changed
+
+- The install steps take the PX4 version as well as the platform, since a
+  release now has engines for two PX4 versions, and put the engine into
+  `engines/<PX4 version>/`. The GitHub Action installs the engine for the
+  newest PX4 release unless `px4` names another, so from this release on it
+  checks against PX4 v1.18.0 by default.
 
 ## 0.4.3 - 2026-11-07
 
