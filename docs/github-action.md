@@ -37,6 +37,7 @@ to the release of the action itself.
 | `arguments` | empty | Further options for every file, for example `--ignore CA011` or `--max-thrust-gain 3`. |
 | `summary` | `true` | Whether the Markdown reports are added to the job summary. |
 | `version` | `0.4.3` | Release of actuator-lint to install. |
+| `px4` | empty | PX4 release whose engine is installed, `v1.18.0` or `v1.17.0`; every report is then for that version. Empty: the newest PX4 release that release of actuator-lint has an engine for (`v1.18.0` from 0.5.0 on, `v1.17.0` before). |
 
 ## Outputs
 

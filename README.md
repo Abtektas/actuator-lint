@@ -112,19 +112,25 @@ release 0.4.3.
    which you can also install directly, for example
    `uv tool install https://github.com/Abtektas/actuator-lint/releases/download/v0.4.3/actuator_lint-0.4.3-py3-none-any.whl`.
 
-2. The engine. Choose `linux-x86_64`, `linux-arm64` or `macos-arm64`:
+2. The engine. Choose `linux-x86_64`, `linux-arm64` or `macos-arm64`, and the
+   PX4 version you fly, `v1.18.0` or `v1.17.0`:
 
    ```
    PLATFORM=linux-x86_64
+   PX4=v1.18.0
    BASE=https://github.com/Abtektas/actuator-lint/releases/download/v0.4.3
    curl -LO $BASE/SHA256SUMS
-   NAME=$(grep -o "actuator_lint_engine-.*-$PLATFORM" SHA256SUMS)
+   NAME=$(grep -o "actuator_lint_engine-.*$PX4-schema[0-9]*-$PLATFORM" SHA256SUMS)
    curl -LO $BASE/$NAME.tar.gz
    shasum -a 256 --ignore-missing -c SHA256SUMS
    tar -xzf $NAME.tar.gz
-   mkdir -p ~/.local/share/actuator-lint
-   cp $NAME/actuator_lint_engine ~/.local/share/actuator-lint/
+   mkdir -p ~/.local/share/actuator-lint/engines/$PX4
+   cp $NAME/actuator_lint_engine ~/.local/share/actuator-lint/engines/$PX4/
    ```
+
+   Release 0.4.3 has engines for `v1.17.0` only; from 0.5.0 on there is one
+   for each of the two PX4 versions. To check against both, repeat the step with
+   the other `PX4`; see [Engines for several PX4 versions](#engines-for-several-px4-versions).
 
    The checksum line must say `OK`. If `shasum` is missing on Linux, use
    `sha256sum --ignore-missing -c SHA256SUMS`. With the GitHub CLI you can also check that
@@ -148,8 +154,8 @@ Requirements of the prebuilt engines:
 | `linux-x86_64`, `linux-arm64` | glibc 2.38 or newer, for example Ubuntu 24.04. Ubuntu 22.04 and Debian 12 are too old. |
 | `macos-arm64` | macOS 14 or newer on Apple silicon. Download with `curl` as shown; a file downloaded with a browser is blocked by macOS until you remove its quarantine attribute. |
 
-The prebuilt engines contain the control allocation code of **PX4 v1.17.0**. A
-result is only valid for the PX4 version the engine was built against, which
+The prebuilt engines contain the control allocation code of **PX4 v1.18.0** or
+**PX4 v1.17.0**, one engine for each. A result is only valid for the PX4 version the engine was built against, which
 every report names. For another PX4 version or platform, build the engine
 yourself, see [Building the engine](#building-the-engine).
 
@@ -181,7 +187,7 @@ version you fly.
 `actuator-lint engines` lists the engines the tool finds, the PX4 version each
 was built against and the one a run without `--engine` and `--px4` uses.
 
-The prebuilt engines are still for PX4 v1.17.0 only. An engine for another
+The prebuilt engines are for PX4 v1.18.0 and v1.17.0. An engine for another
 version is one you [build yourself](#building-the-engine) and copy into such a
 directory.
 
@@ -318,7 +324,7 @@ report.
 |---|---|---|
 | Unit tests | parsers, rules and reports behave as documented | Python only |
 | End-to-end tests | the examples give the expected findings | the engine |
-| Golden tests | the reports for all airframe scripts shipped with PX4 v1.17.0 have not changed | the engine and a PX4 checkout |
+| Golden tests | the reports for all airframe scripts shipped with PX4 v1.17.0 and v1.18.0 have not changed | the engine and a PX4 checkout |
 | SITL cross-check | the engine's effectiveness matrices equal the ones of a running PX4 (`control_allocator status`) | the engine and a PX4 SITL build |
 | SDF tests | each SDF rule fires on a broken model and not on the working one; no error on PX4's own gz models; the model reader gives the poses and joint axes of libsdformat | Python only; a PX4 checkout with its gz models; the `sdformat14` Python bindings |
 

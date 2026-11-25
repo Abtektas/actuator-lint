@@ -22,7 +22,7 @@ $ actuator-lint engines
 ```
 
 `actuator-lint engines` lists the engine that was found and the PX4 version it
-was built against. The prebuilt engines are for PX4 v1.17.0. A report is only
+was built against. The prebuilt engines are for PX4 v1.18.0 and v1.17.0. A report is only
 valid for the PX4 version of the engine, so the firmware of your vehicle
 should be that version.
 

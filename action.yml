@@ -26,6 +26,12 @@ inputs:
   version:
     description: Release of actuator-lint to install, without the leading v.
     default: "0.4.3"
+  px4:
+    description: >-
+      PX4 release whose engine is installed, for example v1.17.0. Every report
+      is then for that PX4 version. Empty: the newest PX4 release the
+      actuator-lint release has an engine for.
+    default: ""
 
 outputs:
   files:
@@ -42,6 +48,7 @@ runs:
       shell: bash
       env:
         ACTUATOR_LINT_VERSION: ${{ inputs.version }}
+        ACTUATOR_LINT_PX4_INPUT: ${{ inputs.px4 }}
         GH_TOKEN: ${{ github.token }}
       run: bash "$GITHUB_ACTION_PATH/action/install.sh"
     - name: Check the parameter files
