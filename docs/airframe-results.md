@@ -65,11 +65,17 @@ airframes, `8011_gz_omnicopter` and `10019_gazebo-classic_omnicopter`, are why
 rule CA012 leaves a multirotor alone whose rotors do not all act along the
 vertical: two of their eight rotors point backwards on purpose.
 
-## Newer PX4 versions
+## PX4 v1.18.0
 
-There are no stored reports for PX4 versions after v1.17.0 yet. One script
-that is new in release/1.18 gets findings there, checked on 2026-10-13 with an
-engine built against 492d132563:
+Stored since tool 0.5.0, made with an engine built against v1.18.0
+(935addf1d6). 142 scripts: 97 checked, 28 unsupported `CA_AIRFRAME`, 16 with
+no parameters, 1 with no `CA_*` parameters.
+
+Compared with v1.17.0, no result of the 131 scripts both releases ship changed.
+The matrices of `init.d-posix/airframes/10042_sihsim_xvert` did: PX4 corrected
+the sign of `CA_SV_CS1_TRQ_P` and `_Y` there (f17f70be6f). Of the 11 new
+scripts, 5 have an unsupported `CA_AIRFRAME` (airship, three rovers,
+`70001_gz_atmos_dual`) and one gets findings:
 
 | Script | Rule | What it means |
 |---|---|---|

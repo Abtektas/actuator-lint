@@ -48,7 +48,7 @@ removed or changes meaning. Adding a field does not increase it.
 | 1 | development | first format |
 
 `dropped_axes_bitmask` is `null` when the PX4 version the engine was built
-against does not report dropped axes (PX4 v1.17.0 does not).
+against does not report dropped axes (PX4 v1.17.0 and v1.18.0 do not).
 
 `not_integer_parameters` was added with tool 0.4.0: the integer parameters of
 the input whose value is not an integer. The engine leaves them at their
@@ -68,7 +68,8 @@ version.
 
 | PX4 | Commit | Status | Checked on |
 |---|---|---|---|
-| `v1.17.0` (latest stable release, 2026-05-13) | `d6f12ad1c4` | target of the prebuilt engines; all tests pass, including golden tests and SITL cross-check, on macOS arm64 and Linux arm64 | 2026-10-02, macOS arm64 again on 2026-10-15 |
+| `v1.18.0` (latest stable release, 2026-11-24) | `935addf1d6` | target of prebuilt engines since tool 0.5.0; all tests pass, including golden tests and SITL cross-check, on Linux x86_64 and arm64 (`px4io/px4-dev:v1.18.0`) and macOS arm64 | 2026-11-25 |
+| `v1.17.0` (stable release, 2026-05-13) | `d6f12ad1c4` | target of the prebuilt engines; all tests pass, including golden tests and SITL cross-check, on macOS arm64 and Linux arm64 | 2026-10-02, macOS arm64 again on 2026-10-15 |
 | `v1.18.0-beta1-934-g8c243a2cd6` (main) | `8c243a2cd6` | builds, unit and end-to-end tests pass; no golden reports, no cross-check | 2026-10-13, macOS arm64 |
 
 Both builds give identical matrices for the files in `examples/`, except
@@ -78,8 +79,8 @@ the tool finds the same axis itself ([CA006](../rules/CA006.md)).
 
 Known differences between PX4 versions that the engine handles:
 
-- `ControlAllocation::getDroppedAxes()` does not exist in `v1.17.0`. The engine
-  build detects this and writes `null`.
+- `ControlAllocation::getDroppedAxes()` does not exist in `v1.17.0` or
+  `v1.18.0`. The engine build detects this and writes `null`.
 
 Supported `CA_AIRFRAME` values so far: 0 (multirotor), 1 (fixed-wing, since tool
 0.2.0), 2 (standard VTOL), and since tool 0.3.0: 3 (tiltrotor VTOL), 4

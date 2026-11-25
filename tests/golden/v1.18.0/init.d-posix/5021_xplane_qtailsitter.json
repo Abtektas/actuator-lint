@@ -1,0 +1,187 @@
+{
+ "status": "checked",
+ "airframe": {
+  "ca_airframe": 4,
+  "name": "VTOL Tailsitter",
+  "num_motors": 4,
+  "num_servos": 0
+ },
+ "findings": [
+  {
+   "rule": "CA006",
+   "matrix": 0,
+   "axis": "thrust_x",
+   "actuators": []
+  },
+  {
+   "rule": "CA006",
+   "matrix": 0,
+   "axis": "thrust_y",
+   "actuators": []
+  }
+ ],
+ "matrices": [
+  {
+   "index": 0,
+   "method": "sequential_desaturation",
+   "normalize_rpy": true,
+   "actuators": [
+    "motor0",
+    "motor1",
+    "motor2",
+    "motor3"
+   ],
+   "axes": [
+    {
+     "axis": "roll",
+     "status": "controlled",
+     "authority": 3.4018
+    },
+    {
+     "axis": "pitch",
+     "status": "controlled",
+     "authority": 1.7404
+    },
+    {
+     "axis": "yaw",
+     "status": "controlled",
+     "authority": 0.6575
+    },
+    {
+     "axis": "thrust_x",
+     "status": "controlled",
+     "authority": 0.6241
+    },
+    {
+     "axis": "thrust_y",
+     "status": "controlled",
+     "authority": 0.32
+    },
+    {
+     "axis": "thrust_z",
+     "status": "controlled",
+     "authority": 7.9692
+    }
+   ],
+   "effectiveness": {
+    "roll": [
+     -0.8504,
+     0.8504,
+     0.8504,
+     -0.8504
+    ],
+    "pitch": [
+     0.4351,
+     -0.4351,
+     0.4351,
+     -0.4351
+    ],
+    "yaw": [
+     0.1644,
+     0.1644,
+     -0.1644,
+     -0.1644
+    ],
+    "thrust_x": [
+     -0.156,
+     0.156,
+     -0.156,
+     0.156
+    ],
+    "thrust_y": [
+     0.08,
+     -0.08,
+     -0.08,
+     0.08
+    ],
+    "thrust_z": [
+     -1.9923,
+     -1.9923,
+     -1.9923,
+     -1.9923
+    ]
+   },
+   "mix": [
+    {
+     "roll": -0.4047,
+     "pitch": 0.7071,
+     "yaw": 1.0,
+     "thrust_x": -1,
+     "thrust_y": 1,
+     "thrust_z": -1
+    },
+    {
+     "roll": 0.4047,
+     "pitch": -0.7071,
+     "yaw": 1.0,
+     "thrust_x": 1,
+     "thrust_y": -1,
+     "thrust_z": -1
+    },
+    {
+     "roll": 0.4047,
+     "pitch": 0.7071,
+     "yaw": -1.0,
+     "thrust_x": -1,
+     "thrust_y": -1,
+     "thrust_z": -1
+    },
+    {
+     "roll": -0.4047,
+     "pitch": -0.7071,
+     "yaw": -1.0,
+     "thrust_x": 1,
+     "thrust_y": 1,
+     "thrust_z": -1
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "method": "pseudo_inverse",
+   "normalize_rpy": false,
+   "actuators": [],
+   "axes": [
+    {
+     "axis": "roll",
+     "status": "not controlled",
+     "authority": 0
+    },
+    {
+     "axis": "pitch",
+     "status": "not controlled",
+     "authority": 0
+    },
+    {
+     "axis": "yaw",
+     "status": "not controlled",
+     "authority": 0
+    },
+    {
+     "axis": "thrust_x",
+     "status": "not controlled",
+     "authority": 0
+    },
+    {
+     "axis": "thrust_y",
+     "status": "not controlled",
+     "authority": 0
+    },
+    {
+     "axis": "thrust_z",
+     "status": "not controlled",
+     "authority": 0
+    }
+   ],
+   "effectiveness": {
+    "roll": [],
+    "pitch": [],
+    "yaw": [],
+    "thrust_x": [],
+    "thrust_y": [],
+    "thrust_z": []
+   },
+   "mix": []
+  }
+ ]
+}
