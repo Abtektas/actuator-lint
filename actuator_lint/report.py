@@ -92,7 +92,7 @@ def _flight_phases(engine_result: dict) -> list[dict] | None:
     ]
 
 
-def build_report(param_file: ParamFile, engine_result: dict, checked: Result) -> dict:
+def build_report(param_file: ParamFile, engine_result: dict, checked: Result, model: dict | None = None) -> dict:
     matrices = []
 
     for matrix in engine_result.get("matrices", []):
@@ -108,7 +108,7 @@ def build_report(param_file: ParamFile, engine_result: dict, checked: Result) ->
             }
         )
 
-    return {
+    report = {
         "tool_version": __version__,
         "input": {
             "path": param_file.path,
@@ -134,6 +134,12 @@ def build_report(param_file: ParamFile, engine_result: dict, checked: Result) ->
         "flight_phases": _flight_phases(engine_result),
         "disclaimer": DISCLAIMER,
     }
+
+    if model is not None:
+        # only with --sdf, so that the reports without it stay as they were
+        report["model"] = model
+
+    return report
 
 
 def render_json(report: dict) -> str:
@@ -198,6 +204,24 @@ _PHASE_OTHER_MATRICES = (
 )
 
 
+def _model_lines(model: dict, model_label: str, world_label: str) -> list[str]:
+    """The model of --sdf and what was read from it."""
+    if "links" not in model:
+        return [f"{model_label}{model['model']} (not read)"]
+
+    ratio = model.get("thrust_to_weight")
+    lift = "" if ratio is None else f", thrust to weight {ratio:.2f}"
+    lines = [
+        f"{model_label}{model['model']} ({model['links']} links, {model['motor_plugins']} motor plugins, "
+        f"{model['mass_kg']:g} kg{lift})"
+    ]
+
+    if model.get("world"):
+        lines.append(f"{world_label}{model['world']}")
+
+    return lines
+
+
 def render_text(report: dict) -> str:
     source = report["input"]
     px4 = report["px4"]
@@ -210,6 +234,9 @@ def render_text(report: dict) -> str:
         f"Airframe:  CA_AIRFRAME {airframe['ca_airframe']} ({airframe['name']})",
         f"Actuators: {airframe['num_motors']} motors, {airframe['num_servos']} servos",
     ]
+
+    if "model" in report:
+        lines += _model_lines(report["model"], "Model:     ", "World:     ")
 
     if report["notes"]:
         lines += ["", "Notes"]
@@ -315,6 +342,12 @@ def render_markdown(report: dict) -> str:
         f"- Airframe: `CA_AIRFRAME` {airframe['ca_airframe']} ({airframe['name']}), "
         f"{airframe['num_motors']} motors, {airframe['num_servos']} servos",
         f"- Tool: actuator-lint {report['tool_version']}",
+    ]
+
+    if "model" in report:
+        lines += _model_lines(report["model"], "- Model: ", "- World: ")
+
+    lines += [
         "",
         "#### Findings",
         "",

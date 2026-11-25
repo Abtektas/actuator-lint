@@ -72,6 +72,14 @@ RULES = {
         Rule("CA022", WARNING, "a rotor is assigned to a tilt servo that does not exist"),
         Rule("CA030", ERROR, "a line of the parameter file could not be used"),
         Rule("CA031", WARNING, "a control allocation parameter does not exist in this PX4 version"),
+        # rules for a Gazebo model, run with --sdf (actuator_lint/sdf.py)
+        Rule("SDF001", ERROR, "the world loads its own systems but not one that a sensor of the model needs"),
+        Rule("SDF002", ERROR, "a sensor that PX4 reads in simulation is missing from base_link"),
+        Rule("SDF010", ERROR, "a rotor pushes along another axis than the one it spins about"),
+        Rule("SDF011", ERROR, "a rotor joint cannot reach full speed"),
+        Rule("SDF012", ERROR, "a motor gets no speed commands"),
+        Rule("SDF013", ERROR, "the rotors cannot lift the model"),
+        Rule("SDF020", ERROR, "the motors of the model do not match the control allocation rotors"),
     )
 }
 

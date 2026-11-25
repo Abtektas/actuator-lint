@@ -94,14 +94,14 @@ class Reports(unittest.TestCase):
     def test_no_option_leaves_the_disclaimer_out(self):
         from actuator_lint.cli import _check_parser, _diff_parser
 
-        for parser in (_check_parser(), _diff_parser()):
+        common = ["-h", "--help", "--input-format", "--format", "--output", "--engine", "--px4", "--fail-on"]
+        common += ["--ignore", "--max-thrust-gain", "--version"]
+        # --sdf and --world only add findings and a line about the model
+        for parser, extra in ((_check_parser(), ["--sdf", "--world"]), (_diff_parser(), [])):
             options = [option for action in parser._actions for option in action.option_strings]
             self.assertEqual(
                 sorted(options),
-                sorted(
-                    ["-h", "--help", "--input-format", "--format", "--output", "--engine", "--px4", "--fail-on"]
-                    + ["--ignore", "--max-thrust-gain", "--version"]
-                ),
+                sorted(common + extra),
                 "a new option: check that it cannot remove the disclaimer, then add it here",
             )
 

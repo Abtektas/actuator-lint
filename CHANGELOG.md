@@ -3,6 +3,21 @@
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions are explained in [docs/versioning.md](docs/versioning.md).
 
+## Unreleased
+
+### Added
+
+- `--sdf MODEL` and `--world FILE`: check a Gazebo (gz-sim) vehicle model and
+  its world against the parameter file, with seven new rules: SDF001 (the world
+  loads its own systems but not one a sensor needs), SDF002 (a sensor PX4 reads
+  is missing from `base_link`), SDF010 (a rotor pushes along another axis than
+  it spins about), SDF011 (a rotor joint cannot reach full speed), SDF012 (a
+  motor gets no speed commands), SDF013 (the rotors cannot lift the model) and
+  SDF020 (the motors do not match the control allocation rotors). The model is
+  read by the tool itself; nothing new needs to be installed. On the gz models
+  and airframes of PX4 v1.17.0, v1.18.0-rc1 and main (91516d4c44) the rules
+  give no error and no warning. Reports without `--sdf` are unchanged.
+
 ## 0.4.3 - 2026-11-07
 
 Prebuilt engines contain the control allocation code of PX4 v1.17.0
